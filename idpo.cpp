@@ -15,7 +15,7 @@ struct RGB
 #endif
 
 const long IDPO_IDENT	=0x4F504449;
-const long IDPO_VERSION	=6;
+const long IDPO_VERSION	=3;
 struct IDPOHeader
 {
 	unsigned long id;			// 0x4F504449 = "IDPO" for IDPOLYGON
@@ -33,8 +33,6 @@ struct IDPOHeader
 	unsigned long numtris;		// Number of triangles surfaces
 	unsigned long numframes;    // Number of frames
 	unsigned long synctype;     // 0= synchron, 1= random
-	unsigned long flags;        // 0 (see Alias models)
-	float size;					// average size of triangles
 };
 struct IDPOPoint
 {
@@ -60,7 +58,7 @@ struct IDPOFrameHeader
 {
 	IDPOVertex min;					// minimum values of X,Y,Z
 	IDPOVertex max;					// maximum values of X,Y,Z
-	char name[IDPO_MAX_FRAME_NAME];	// name of frame
+	//char name[IDPO_MAX_FRAME_NAME];	// name of frame
 };
 
 const RGB quake_palette[]={
@@ -305,7 +303,7 @@ bool loadIDPOFrame(void)
 	max.x=frame_header.max.packedposition[0]*header.scale.x+header.origin.x;
 	max.y=frame_header.max.packedposition[1]*header.scale.y+header.origin.y;
 	max.z=frame_header.max.packedposition[2]*header.scale.z+header.origin.z;
-	if (model->addFrame(frame_header.name,min,max,header.numverts,frame_vertices,frame_normals)==-1)
+	if (model->addFrame("",min,max,header.numverts,frame_vertices,frame_normals)==-1)
 	{
 		free(frame_normals);
 		free(frame_vertices);
@@ -526,7 +524,7 @@ bool loadIDPO(Model *mdl,const char *file_name)
 			unsigned vertex_index=tris[i].vertices[j];
 			float s=(float)st_verts[vertex_index].s/f_width;
 			float t=(float)st_verts[vertex_index].t/f_height;
-			if ((!tris[i].facesfront)&&(st_verts[vertex_index].onseam==0x20))
+			if ((!tris[i].facesfront)&&(st_verts[vertex_index].onseam==1))
 				//s+=0.5f;
 				s+=(header.skinwidth>>1)/f_width;
 			point_indexes[j]=model->addPoint(s,t,vertex_index);
