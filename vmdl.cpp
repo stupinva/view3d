@@ -1,8 +1,11 @@
-#include "vmdl.h"	
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <windows.h>
+#include <gl\gl.h>
+#include <gl\glu.h>
+#include "vmdl.h"
 
 Vector3D CrossProduct(Vector3D v0,Vector3D v1)
 {
@@ -28,6 +31,14 @@ Vector3D Add(Vector3D v0,Vector3D v1)
 	v2.z=v0.z+v1.z;
 	return v2;
 }
+Vector3D Mul(Vector3D v0,float f)
+{
+	Vector3D v1;
+	v1.x=v0.x*f;
+	v1.y=v0.y*f;
+	v1.z=v0.z*f;
+	return v1;
+}
 Vector3D Div(Vector3D v0,float f)
 {
 	Vector3D v1;
@@ -36,7 +47,12 @@ Vector3D Div(Vector3D v0,float f)
 	v1.z=v0.z/f;
 	return v1;
 }
-
+float Length(Vector3D v)
+{
+	float length=v.x*v.x+v.y*v.y+v.z*v.z;
+	length=(float)sqrt(length);
+	return length;
+}
 const float DELTA	=0.00001f;
 Vector3D Normalize(Vector3D v0)
 {
@@ -106,11 +122,11 @@ bool Model::addSkin(unsigned width,unsigned height,RGB *data)
 		fprintf(stderr,"Not enough memory, all skins lost.\n");
 		return false;
 	}
-	memcpy(&skins[i*skin_width*skin_height],data,skin_width*skin_height);
+	memcpy(&skins[i*skin_width*skin_height],data,skin_width*skin_height*sizeof(RGB));
 	return true;
 }
 
-int Model::addPoint(unsigned s,unsigned t,unsigned vertex_index)
+int Model::addPoint(float s,float t,unsigned vertex_index)
 {
 	for(int i=0;(unsigned)i<num_points;i++)
 		if ((points[i].s==s)&&(points[i].t==t)&&(points[i].vertex_index==vertex_index))
@@ -180,8 +196,15 @@ void Model::printInfo(void)
 					num_triangles,num_triangles*sizeof(Triangle),
 					num_vertices,
 					num_frames,num_frames*(num_vertices*2*sizeof(Vector3D)+sizeof(Frame)));
+	/*for(unsigned k=0;k<num_skins;k++)
+		for(unsigned j=0;j<skin_height;j++)
+			for(unsigned i=0;i<skin_width;i++)
+			{
+				RGB color=skins[k*skin_height*skin_width+j*skin_width+i];
+				fprintf(stdout,"%X %X %X\n",color.red,color.green,color.blue);
+			}*/
 	for(unsigned i=0;i<num_points;i++)
-		fprintf(stdout,"point\t%d\t%d\t%d\n",points[i].s,points[i].t,points[i].vertex_index);
+		fprintf(stdout,"point\t%f\t%f\t%d\n",points[i].s,points[i].t,points[i].vertex_index);
 	for(i=0;i<num_triangles;i++)
 		fprintf(stdout,"triangle\t%d\t%d\t%d\n",
 						triangles[i].point_indexes[0],
@@ -289,7 +312,10 @@ void Model::calculateBoundBoxes(void)
 bool Model::calculateNormals(void)
 {
 	if (!num_vertices)
+	{
+		fprintf(stderr,"Not enough memory.\n");
 		return false;
+	}
 	unsigned *normal_numbers;
 	if ((normal_numbers=(unsigned *)malloc(num_vertices*sizeof(unsigned)))==NULL)
 		return false;
@@ -348,4 +374,128 @@ bool Model::verifyModel(void)
 			(triangles[i].point_indexes[2]>=num_points))
 			return false;
 	return true;
+}
+unsigned Model::getNumFrames(void)
+{
+	return num_frames;
+}
+unsigned Model::getNumSkins(void)
+{
+	return num_skins;
+}
+bool Model::drawModel(unsigned skin_index,unsigned frame_index,bool draw_skin,bool lighting)
+{
+	if (frame_index>=num_frames)
+		return false;
+	if (skin_index>=num_skins)
+		return false;
+	Vector3D *frame_vertices=&vertices[frame_index*num_vertices];
+	Vector3D *frame_normals=&normals[frame_index*num_vertices];
+	if (draw_skin)
+	{
+		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+
+		//glDrawPixels(skin_width,skin_height,GL_RGB,GL_UNSIGNED_BYTE,
+		//	&skins[skin_width*skin_height*skin_index]);
+		glTexImage2D(GL_TEXTURE_2D,0,3,skin_width,skin_height,0,GL_RGB,GL_UNSIGNED_BYTE,
+			&skins[skin_width*skin_height*skin_index]);
+
+		//gluBuild2DMipmaps(GL_TEXTURE_2D,3,skin_width,skin_height,GL_RGB,GL_UNSIGNED_BYTE,
+		//	&skins[skin_width*skin_height*skin_index]));
+		glBegin(GL_TRIANGLES);
+		if (lighting)
+			for(unsigned i=0;i<num_triangles;i++)
+			{
+				Triangle triangle=triangles[i];
+				for(unsigned j=0;j<3;j++)
+				{
+					Point point=points[triangle.point_indexes[j]];
+					unsigned vertex_index=points[triangle.point_indexes[j]].vertex_index;
+					glTexCoord2f(point.s,point.t);
+					glNormal3fv((const float *)&frame_normals[vertex_index]);
+					glVertex3fv((const float *)&frame_vertices[vertex_index]);
+				}
+			}
+		else
+			for(unsigned i=0;i<num_triangles;i++)
+			{
+				Triangle triangle=triangles[i];
+				for(unsigned j=0;j<3;j++)
+				{
+					Point point=points[triangle.point_indexes[j]];
+					unsigned vertex_index=points[triangle.point_indexes[j]].vertex_index;
+					glTexCoord2f(point.s,point.t);
+					glVertex3fv((const float *)&frame_vertices[vertex_index]);
+				}
+			}
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_TRIANGLES);
+		if (lighting)
+			for(unsigned i=0;i<num_triangles;i++)
+			{
+				Triangle triangle=triangles[i];
+				for(unsigned j=0;j<3;j++)
+				{
+					unsigned vertex_index=points[triangle.point_indexes[j]].vertex_index;
+					glNormal3fv((const float *)&frame_normals[vertex_index]);
+					glVertex3fv((const float *)&frame_vertices[vertex_index]);
+				}
+			}
+		else
+			for(unsigned i=0;i<num_triangles;i++)
+			{
+				Triangle triangle=triangles[i];
+				for(unsigned j=0;j<3;j++)
+				{
+					unsigned vertex_index=points[triangle.point_indexes[j]].vertex_index;
+					glVertex3fv((const float *)&frame_vertices[vertex_index]);
+				}
+			}
+		glEnd();
+	}
+	return true;
+}
+bool Model::drawNormals(unsigned frame_index)
+{
+	if (frame_index>=num_frames)
+		return false;
+
+	Vector3D *frame_vertices=&vertices[frame_index*num_vertices];
+	Vector3D *frame_normals=&normals[frame_index*num_vertices];
+	glBegin(GL_LINES);
+	for(unsigned i=0;i<num_vertices;i++)
+	{
+		Vector3D vertex=Add(frame_vertices[i],frame_normals[i]);
+		glVertex3fv((const float *)&frame_vertices[i]);
+		glVertex3fv((const float *)&vertex);
+	}
+	glEnd();
+	return true;
+}
+void Model::getMinMax(Vector3D *min,Vector3D *max)
+{
+	min->x=0;
+	min->y=0;
+	min->z=0;
+	max->x=0;
+	max->y=0;
+	max->z=0;
+	for(unsigned i=0;i<num_frames;i++)
+	{
+		if (min->x>frames[i].min.x)
+			min->x=frames[i].min.x;
+		if (min->y>frames[i].min.y)
+			min->y=frames[i].min.y;
+		if (min->z>frames[i].min.z)
+			min->z=frames[i].min.z;
+		if (max->x<frames[i].max.x)
+			max->x=frames[i].max.x;
+		if (max->y<frames[i].max.y)
+			max->y=frames[i].max.y;
+		if (max->z<frames[i].max.z)
+			max->z=frames[i].max.z;
+	}
 }

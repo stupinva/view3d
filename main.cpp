@@ -1,512 +1,281 @@
+#include <windows.h>
+#include <gl\gl.h>
+#include <gl\glu.h>
+#include <gl\glaux.h>
+#include <math.h>
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include "vmdl.h"
-#include "idpo.h"
-/*
-const unsigned MAX_NAME	=16;
-char model_name[MAX_NAME];
-struct Skin
-{
-	char name[MAX_NAME];
-};
-const unsigned MAX_SKINS	=16;
-unsigned num_skins;
-Skin skins[MAX_SKINS];
 
-const unsigned MAX_STR	=1024;
-bool dump_skins(FILE *idpo_file,unsigned skinwidth,unsigned skinheight,unsigned numskins)
-{
-	fprintf(stdout,"---skins---\n");
-	for(unsigned i=0;i<numskins;i++)
-	{
-		unsigned long group;
-		if (fread(&group,sizeof(group),1,idpo_file)!=1)
-		{
-			fclose(idpo_file);
-			fprintf(stderr,"Could not read group field.\n");
-			return false;
-		}
-		fprintf(stdout,"group\t%d\n",group);
-		char skin_name[MAX_STR];
-		charImage_t image;
-		if (group==0)
-		{
-			if (num_skins>=MAX_SKINS)
-			{
-				fclose(idpo_file);
-				fprintf(stderr,"Too many skins.\n");
-				return false;
-			}
-			sprintf(skins[num_skins].name,"%s_%d",model_name,i);
-			sprintf(skin_name,"%s.tga",skins[num_skins].name);
-			if (image.create(skinwidth,skinheight))
-			{
-				fclose(idpo_file);
-				fprintf(stderr,"Could not get memory.\n");
-				return false;
-			}
-			image.setPalette(quake_palette,0,255);
-			for(unsigned y=0;y<skinheight;y++)
-				for(unsigned x=0;x<skinwidth;x++)
-				{
-					int index=fgetc(idpo_file);
-					if (index!=EOF)
-						image.putPixel(x,y,index);
-				}
-			image.saveTARGA(skin_name);
-			num_skins++;
-		}
-		if (group==1)
-		{
-			unsigned long nb;
-			if (fread(&nb,sizeof(nb),1,idpo_file)!=1)
-			{
-				fclose(idpo_file);
-				fprintf(stderr,"Could not read nb field.\n");
-				return false;
-			}
-			fprintf(stdout,"nb\t%d\n",nb);
-			if (num_skins+nb>=MAX_SKINS)
-			{
-				fclose(idpo_file);
-				fprintf(stderr,"Too many skins.\n");
-				return false;
-			}
-			for(unsigned j=0;j<nb;j++)
-			{
-				float time;
-				if (fread(&time,sizeof(time),1,idpo_file)!=1)
-				{
-					fclose(idpo_file);
-					fprintf(stderr,"Could not read time field.\n");
-					return false;
-				}
-				fprintf(stdout,"time\t%f\n",time);
-			}
-			for(j=0;j<nb;j++)
-			{
+#pragma warning(disable:4244)
 
-				sprintf(skins[num_skins].name,"%s_%d_%d",model_name,i,j);
-				sprintf(skin_name,"%s.tga",skins[num_skins].name);
-				if (image.create(skinwidth,skinheight))
-				{
-					fclose(idpo_file);
-					fprintf(stderr,"Could not get memory.\n");
-					return false;
-				}
-				image.setPalette(quake_palette,0,255);
-				for(unsigned y=0;y<skinheight;y++)
-					for(unsigned x=0;x<skinwidth;x++)
-					{
-						int index=fgetc(idpo_file);
-						if (index!=EOF)
-							image.putPixel(x,y,index);
-					}
-				image.saveTARGA(skin_name);
-				num_skins++;
-			}
-		}
-	}
-	return true;
-}
-*/
-FILE *idpo_file;
-IDPOHeader idpo_header;
+const float ZBUFFER_MIN	=10.0f;
+const float M_PI		=3.14159265f;
+
+float zbuffer_min=ZBUFFER_MIN;
+float zbuffer_max=2.0f*ZBUFFER_MIN;
+
+float camera_half_width=4.0f;
+float camera_half_height=4.0f;
+float camera_yaw=0.0f;
+float camera_angle=0.0f;
+float camera_dist=(zbuffer_max-zbuffer_min)/2.0f;
+float length;
+Vector3D min;
+Vector3D max;
+
+bool draw_skin=true;
+bool draw_normals=false;
+bool lighting=true;
+
+unsigned num_skins=0;
+unsigned skin_num=0;
+
+unsigned num_frames=0;
+unsigned frame_num=0;
+
 Model model;
-
-bool dump_skins(void)
+static void CALLBACK Draw(void)
 {
-	//fprintf(stdout,"---skins---\n");
-	RGB *skin;
-	if ((skin=(RGB *)malloc(idpo_header.skinwidth*idpo_header.skinheight*sizeof(RGB)))==NULL)
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	
+	glFrustum(-camera_half_width,camera_half_width,
+		-camera_half_height,camera_half_height,zbuffer_min,zbuffer_max);
+	glTranslatef(0.0f,0.0f,-camera_dist);
+	glRotatef(camera_yaw,1.0f,0.0f,0.0f);
+	glRotatef(90.0f-camera_angle,0.0f,1.0f,0.0f);
+	
+	glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
+	const float xyz[]=
 	{
-		fclose(idpo_file);
-		fprintf(stderr,"Could not get memory for skin.\n");
-		return false;
-	}
+		-1.0f,0.0f,0.0f,0.0f,
+		0.0f,0.0f,1.0f,0.0f,
+		0.0f,1.0f,0.0f,0.0f,
+		0.0f,0.0f,0.0f,1.0f
+	};
+	glLoadMatrixf(xyz);
+	
+	glPolygonMode(GL_FRONT,GL_FILL);
+	if (lighting)
+	{
+		glEnable(GL_LIGHTING);
 
-	for(unsigned i=0;i<(unsigned)idpo_header.numskins;i++)
-	{
-		unsigned long group;
-		if (fread(&group,sizeof(group),1,idpo_file)!=1)
-		{
-			free(skin);
-			fclose(idpo_file);
-			fprintf(stderr,"Could not read group field.\n");
-			return false;
-		}
-		//fprintf(stdout,"group\t%d\n",group);
-		if (group==0)
-		{
-			for(unsigned y=0;y<(unsigned)idpo_header.skinheight;y++)
-				for(unsigned x=0;x<(unsigned)idpo_header.skinwidth;x++)
-				{
-					int index=fgetc(idpo_file);
-					if (index!=EOF)
-						skin[y*idpo_header.skinwidth+x]=quake_palette[index];
-					else
-						{
-							free(skin);
-							fclose(idpo_file);
-							fprintf(stderr,"Could not read skin.\n");
-							return false;
-						}
-				}
-			model.addSkin(idpo_header.skinwidth,idpo_header.skinheight,skin);
-		}
-		if (group==1)
-		{
-			unsigned long nb;
-			if (fread(&nb,sizeof(nb),1,idpo_file)!=1)
-			{
-				free(skin);
-				fclose(idpo_file);
-				fprintf(stderr,"Could not read nb field.\n");
-				return false;
-			}
-			//fprintf(stdout,"nb\t%d\n",nb);
-			for(unsigned j=0;j<nb;j++)
-			{
-				float time;
-				if (fread(&time,sizeof(time),1,idpo_file)!=1)
-				{
-					fclose(idpo_file);
-					fprintf(stderr,"Could not read time field.\n");
-					return false;
-				}
-				//fprintf(stdout,"time\t%f\n",time);
-			}
-			for(j=0;j<nb;j++)
-			{
-				for(unsigned y=0;y<(unsigned)idpo_header.skinheight;y++)
-					for(unsigned x=0;x<(unsigned)idpo_header.skinwidth;x++)
-					{
-						int index=fgetc(idpo_file);
-						if (index!=EOF)
-							skin[y*idpo_header.skinwidth+x]=quake_palette[index];
-						else
-						{
-							free(skin);
-							fclose(idpo_file);
-							fprintf(stderr,"Could not read skin.\n");
-							return false;
-						}
-					}
-				model.addSkin(idpo_header.skinwidth,idpo_header.skinheight,skin);
-			}
-		}
+		const float direction0[]={0.0f,-1.0f,0.0f};
+		const float position0[]={0.0f,camera_dist,0.0f,1.0f};
+		const float specular0[]={5.0f,5.0f,5.0f,5.0f};
+		const float diffuse0[]={5.0f,5.0f,5.0f,5.0f};
+		const float ambient0[]={3.0f,3.0f,3.0f,3.0f};
+		glLightf(GL_LIGHT0,GL_SPOT_EXPONENT,0.0f);
+		glLightfv(GL_LIGHT0,GL_SPOT_DIRECTION,direction0);
+		glLightfv(GL_LIGHT0,GL_POSITION,position0);
+		glLightfv(GL_LIGHT1,GL_SPECULAR,specular0);
+		glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuse0);
+		glLightfv(GL_LIGHT0,GL_AMBIENT,ambient0);
+		glEnable(GL_LIGHT0);
+
+		const float direction1[]={0.0f,1.0f,0.0f};
+		const float position1[]={0.0f,-camera_dist,0.0f,1.0f};
+		const float specular1[]={5.0f,5.0f,5.0f,5.0f};
+		const float diffuse1[]={5.0f,5.0f,5.0f,5.0f};
+		glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,0.0f);
+		glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,direction1);
+		glLightfv(GL_LIGHT1,GL_POSITION,position1);
+		glLightfv(GL_LIGHT1,GL_SPECULAR,specular1);
+		glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuse1);
+		glEnable(GL_LIGHT1);
 	}
-	free(skin);
-	return true;
+	else
+		glDisable(GL_LIGHTING);
+	if (draw_skin)
+	{
+		glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+		glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+		glEnable(GL_TEXTURE_2D);
+		glShadeModel(GL_SMOOTH);
+		
+		if (lighting)
+			glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+		else
+			glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_DECAL);
+	}
+	else
+	{
+		glDisable(GL_TEXTURE_2D);
+		glColor3f(1.0f,1.0f,1.0f);
+	}
+	model.drawModel(skin_num,frame_num,draw_skin,lighting);
+	if (draw_normals)
+	{
+		glDisable(GL_TEXTURE_2D);
+		glColor3f(1.0f,1.0f,1.0f);
+		model.drawNormals(frame_num);
+	}
+	//model.drawModel(0,frame_num);
+	glFinish();
+	auxSwapBuffers();
+}
+static void SwitchDrawSkin(void)
+{
+	draw_skin=!draw_skin;
+}
+static void SwitchLighting(void)
+{
+	lighting=!lighting;
+}
+static void SwitchDrawNormals(void)
+{
+	draw_normals=!draw_normals;
+}
+static void DistUp(void)
+{
+	camera_dist-=1.0f;
+	if (camera_dist<zbuffer_min)
+		camera_dist=zbuffer_min;
+}
+static void DistDown(void)
+{
+	camera_dist+=1.0f;
+	if (camera_dist>zbuffer_max)
+		camera_dist=zbuffer_max;
+}
+static void PrevFrame(void)
+{
+	frame_num--;
+	if ((int)frame_num<0)
+		frame_num=0;
+}
+static void NextFrame(void)
+{
+	frame_num++;
+	if (frame_num>=num_frames)
+		frame_num=num_frames-1;
+}
+static void PrevSkin(void)
+{
+	skin_num--;
+	if ((int)skin_num<0)
+		skin_num=0;
+}
+static void NextSkin(void)
+{
+	skin_num++;
+	if (skin_num>=num_skins)
+		skin_num=num_skins-1;
+}
+static void YawUp(void)
+{
+	camera_yaw+=1.0f;
+	if (camera_yaw>90.0f)
+		camera_yaw=90.0f;
+}
+static void YawDown(void)
+{
+	camera_yaw-=1.0f;
+	if (camera_yaw<-90.0f)
+		camera_yaw=-90.0f;
+}
+static void AngleRight(void)
+{
+	camera_angle-=1.0f;
+	if (camera_angle<-180.0f)
+		camera_angle+=360.0f;
+}
+static void AngleLeft(void)
+{
+	camera_angle+=1.0f;
+	if (camera_angle>180.0f)
+		camera_angle-=360.0f;
+}
+void InitKeyboard(void)
+{
+	auxKeyFunc(AUX_q,(AUXKEYPROC)DistUp);
+	auxKeyFunc(AUX_a,(AUXKEYPROC)DistDown);
+	auxKeyFunc(AUX_z,(AUXKEYPROC)PrevFrame);
+	auxKeyFunc(AUX_x,(AUXKEYPROC)NextFrame);
+	auxKeyFunc(AUX_c,(AUXKEYPROC)PrevSkin);
+	auxKeyFunc(AUX_v,(AUXKEYPROC)NextSkin);
+	
+	auxKeyFunc(AUX_l,(AUXKEYPROC)SwitchLighting);
+	auxKeyFunc(AUX_s,(AUXKEYPROC)SwitchDrawSkin);
+	auxKeyFunc(AUX_n,(AUXKEYPROC)SwitchDrawNormals);
+
+	auxKeyFunc(AUX_UP,(AUXKEYPROC)YawUp);
+	auxKeyFunc(AUX_DOWN,(AUXKEYPROC)YawDown);
+	auxKeyFunc(AUX_LEFT,(AUXKEYPROC)AngleLeft);
+	auxKeyFunc(AUX_RIGHT,(AUXKEYPROC)AngleRight);
 }
 
-unsigned num_idpo_points=0;
-IDPOPoint *idpo_points;
-
-bool dump_points(void)
+static void Init(void)
 {
-	//fprintf(stdout,"---stverts---\n");
-	if ((idpo_points=(IDPOPoint *)malloc(idpo_header.numverts*sizeof(IDPOPoint)))==NULL)
-	{
-		fclose(idpo_file);
-		fprintf(stderr,"Could not get memory for stverts.\n");
-		return false;
-	}
-	if (fread(idpo_points,idpo_header.numverts*sizeof(IDPOPoint),1,idpo_file)!=1)
-	{
-		free(idpo_points);
-		fclose(idpo_file);
-		fprintf(stderr,"Could not read stverts.\n");
-		return false;
-	}
-	num_idpo_points=idpo_header.numverts;
-	return true;
+	InitKeyboard();
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glClearDepth(zbuffer_min);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 }
-
-unsigned num_idpo_triangles=0;
-IDPOTriangle *idpo_triangles;
-
-bool dump_triangles(void)
+static void CALLBACK Reshape(unsigned width,unsigned height)
 {
-	//fprintf(stdout,"---itriangles---\n");
-	if ((idpo_triangles=(IDPOTriangle *)malloc(idpo_header.numtris*sizeof(IDPOTriangle)))==NULL)
-	{
-		fclose(idpo_file);
-		fprintf(stderr,"Could not get memory for triangles.\n");
-		return false;
-	}
-	if (fread(idpo_triangles,idpo_header.numtris*sizeof(IDPOTriangle),1,idpo_file)!=1)
-	{
-		free(idpo_triangles);
-		fclose(idpo_file);
-		fprintf(stderr,"Could not read triangles.\n");
-		return false;
-	}
-	num_idpo_triangles=idpo_header.numtris;
-	return true;
+	glViewport(0,0,width,height);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	
+	camera_half_width=(float)width/(float)height*length*zbuffer_min/camera_dist;
+	camera_half_height=length*zbuffer_min/camera_dist;
 }
-
-bool convert(void)
-{
-	for(unsigned i=0;i<num_idpo_triangles;i++)
-	{
-		int point_indexes[3];
-		for(unsigned j=0;j<3;j++)
-		{
-			unsigned vertex_index=idpo_triangles[i].vertices[j];
-			unsigned s=idpo_points[vertex_index].s;
-			unsigned t=idpo_points[vertex_index].t;
-			if ((!idpo_triangles[i].facesfront)&&(idpo_points[vertex_index].onseam))
-				s+=idpo_header.skinwidth>>1;
-			point_indexes[j]=model.addPoint(s,t,vertex_index);
-		}
-		model.addTriangle(point_indexes[0],point_indexes[1],point_indexes[2]);
-	}
-	return true;
-}
-
-bool dump_frames(void)
-{
-	//fprintf(stdout,"---frames---\n");
-	Vector3D *vertices;
-	Vector3D *normals;
-	if ((vertices=(Vector3D *)malloc(idpo_header.numverts*sizeof(Vector3D)))==NULL)
-	{
-		fclose(idpo_file);
-		fprintf(stderr,"Could not get memory for frame vertices.\n");
-		return false;
-	}
-	if ((normals=(Vector3D *)malloc(idpo_header.numverts*sizeof(Vector3D)))==NULL)
-	{
-		free(vertices);
-		fclose(idpo_file);
-		fprintf(stderr,"Could not get memory for frame normals.\n");
-		return false;
-	}
-
-	for(unsigned i=0;i<(unsigned)idpo_header.numframes;i++)
-	{
-		unsigned long group;
-		if (fread(&group,sizeof(group),1,idpo_file)!=1)
-		{
-			free(normals);
-			free(vertices);
-			fclose(idpo_file);
-			fprintf(stderr,"Could not read group field.\n");
-			return false;
-		}
-		//fprintf(stdout,"group\t%d\n",group);
-		if (group==0)
-		{
-			IDPOFrameHeader idpo_frame_header;
-			if (fread(&idpo_frame_header,sizeof(IDPOFrameHeader),1,idpo_file)!=1)
-			{
-				free(normals);
-				free(vertices);
-				fclose(idpo_file);
-				fprintf(stderr,"Could not read frame header.\n");
-				return false;
-			}
-			for(unsigned vertex_index=0;vertex_index<(unsigned)idpo_header.numverts;vertex_index++)
-			{
-				IDPOVertex vertex;
-				if (fread(&vertex,sizeof(IDPOVertex),1,idpo_file)!=1)
-				{
-					free(normals);
-					free(vertices);
-					fclose(idpo_file);
-					fprintf(stderr,"Could not read frame vertex.\n");
-					return false;
-				}
-				vertices[vertex_index].x=vertex.packedposition[0]*idpo_header.scale.x+idpo_header.origin.x;
-				vertices[vertex_index].y=vertex.packedposition[1]*idpo_header.scale.y+idpo_header.origin.y;
-				vertices[vertex_index].z=vertex.packedposition[2]*idpo_header.scale.z+idpo_header.origin.z;
-				normals[vertex_index]=quake_normals[vertex.lightnormalindex];
-			}
-			Vector3D min;
-			Vector3D max;
-			min.x=idpo_frame_header.min.packedposition[0]*idpo_header.scale.x+idpo_header.origin.x;
-			min.y=idpo_frame_header.min.packedposition[1]*idpo_header.scale.y+idpo_header.origin.y;
-			min.z=idpo_frame_header.min.packedposition[2]*idpo_header.scale.z+idpo_header.origin.z;
-			max.x=idpo_frame_header.max.packedposition[0]*idpo_header.scale.x+idpo_header.origin.x;
-			max.y=idpo_frame_header.max.packedposition[1]*idpo_header.scale.y+idpo_header.origin.y;
-			max.z=idpo_frame_header.max.packedposition[2]*idpo_header.scale.z+idpo_header.origin.z;
-			model.addFrame(idpo_frame_header.name,min,max,idpo_header.numverts,vertices,normals);
-		}
-		if (group==1)
-		{
-			unsigned long nb;
-			if (fread(&nb,sizeof(nb),1,idpo_file)!=1)
-			{
-				free(normals);
-				free(vertices);
-				fclose(idpo_file);
-				fprintf(stderr,"Could not read nb field.\n");
-				return false;
-			}
-			//fprintf(stdout,"nb\t%d\n",nb);
-			for(unsigned j=0;j<nb;j++)
-			{
-				float time;
-				if (fread(&time,sizeof(time),1,idpo_file)!=1)
-				{
-					free(normals);
-					free(vertices);
-					fclose(idpo_file);
-					fprintf(stderr,"Could not read time field.\n");
-					return false;
-				}
-				//fprintf(stdout,"time\t%f\n",time);
-			}
-			for(j=0;j<nb;j++)
-			{
-				IDPOFrameHeader idpo_frame_header;
-				if (fread(&idpo_frame_header,sizeof(idpo_frame_header),1,idpo_file)!=1)
-				{
-					free(normals);
-					free(vertices);
-					fclose(idpo_file);
-					fprintf(stderr,"Could not read frame header.\n");
-					return false;
-				}
-				for(unsigned vertex_index=0;vertex_index<(unsigned)idpo_header.numverts;vertex_index++)
-				{
-					IDPOVertex vertex;
-					if (fread(&vertex,sizeof(vertex),1,idpo_file)!=1)
-					{
-						free(normals);
-						free(vertices);
-						fclose(idpo_file);
-						fprintf(stderr,"Could not read frame vertex.\n");
-						return false;
-					}
-					vertices[vertex_index].x=vertex.packedposition[0]*idpo_header.scale.x+idpo_header.origin.x;
-					vertices[vertex_index].y=vertex.packedposition[1]*idpo_header.scale.y+idpo_header.origin.y;
-					vertices[vertex_index].z=vertex.packedposition[2]*idpo_header.scale.z+idpo_header.origin.z;
-					normals[vertex_index]=quake_normals[vertex.lightnormalindex];
-				}
-				Vector3D min;
-				Vector3D max;
-				min.x=idpo_frame_header.min.packedposition[0]*idpo_header.scale.x+idpo_header.origin.x;
-				min.y=idpo_frame_header.min.packedposition[1]*idpo_header.scale.y+idpo_header.origin.y;
-				min.z=idpo_frame_header.min.packedposition[2]*idpo_header.scale.z+idpo_header.origin.z;
-				max.x=idpo_frame_header.max.packedposition[0]*idpo_header.scale.x+idpo_header.origin.x;
-				max.y=idpo_frame_header.max.packedposition[1]*idpo_header.scale.y+idpo_header.origin.y;
-				max.z=idpo_frame_header.max.packedposition[2]*idpo_header.scale.z+idpo_header.origin.z;
-				model.addFrame(idpo_frame_header.name,min,max,idpo_header.numverts,vertices,normals);
-			}
-		}
-	}
-	free(normals);
-	free(vertices);
-	return true;
-}
-
 void main(int carg,char **varg)
 {
 	if (carg!=2)
 	{
-		fprintf(stderr,"You must specify name of MDL file of Quake.\n");
+		fprintf(stdout,"view3d 1.0 (31-03-2003) by Stupin W.A.\n"
+						"Program for viewing Quake models with OpenGL.\n"
+						"Usage: view3d <model>\n"
+						"\t<model>\t- name of Quake MDL file.\n"
+						"Example: view3d quake\\id1\\pak0\\progs\\player.mdl\n"
+						"Hot keys:\n"
+						"\tModel:\n"
+						"\t\tz\t\t- switch to previous model frame,\n"
+						"\t\tx\t\t- switch to next model frame,\n"
+						"\t\tc\t\t- switch to previous model skin,\n"
+						"\t\tv\t\t- switch to next model skin,\n"
+						"\tRender modes:\n"
+						"\t\tl\t\t- on/off lighting (default - on),\n"
+						"\t\ts\t\t- on/off model skin (default - on),\n"
+						"\t\tn\t\t- on/off model vertex normals (default - off),\n"
+						"\tCamera:\n"
+						"\t\tq\t\t- move camera nearer,\n"
+						"\t\ta\t\t- move camera farther,\n"
+						"\t\tLeft arrow\t- rotate camera left,\n"
+						"\t\tRight arrow\t- rotate camera right,\n"
+						"\t\tUp arrow\t- rotate camera up,\n"
+						"\t\tDown arrow\t- rotate camera down.\n");
 		return;
 	}
-	char *file_name=varg[1];
-	if ((idpo_file=fopen(file_name,"rb"))==NULL)
-	{
-		fprintf(stderr,"Could not open file %s.\n",file_name);
+	if (!loadIDPO(&model,varg[1]))
 		return;
-	}
-	
-	if (fread(&idpo_header,sizeof(idpo_header),1,idpo_file)!=1)
-	{
-		fclose(idpo_file);
-		fprintf(stderr,"Could not read header.\n");
-		return;
-	}
-	if (idpo_header.id!=IDPO_IDENT)
-	{
-		fclose(idpo_file);
-		fprintf(stderr,"Is not a MDL file of Quake.\n");
-		return;
-	}
-	if (idpo_header.version!=6)
-	{
-		fclose(idpo_file);
-		fprintf(stderr,"Not supported version of MDL file of Quake.\n");
-		return;
-	}
-	/*
-	fprintf(stdout,
-		"scale\t\t%f\t%f\t%f\n"
-		"origin\t\t%f\t%f\t%f\n"
-		"radius\t\t%f\n"
-		"offsets\t\t%f\t%f\t%f\n"
-		"numskins\t%d\n"
-		"skinwidth\t%d\n"
-		"skinheight\t%d\n"
-		"numverts\t%d\n"
-		"numtris\t\t%d\n"
-		"numframes\t%d\n"
-		"synctype\t%d\n"
-		"flags\t\t%d\n"
-		"size\t\t%f\n",
-		idpo_header.scale.x,idpo_header.scale.y,idpo_header.scale.z,
-		idpo_header.origin.x,idpo_header.origin.y,idpo_header.origin.z,
-		idpo_header.radius,
-		idpo_header.offsets.x,idpo_header.offsets.y,idpo_header.offsets.z,
-		idpo_header.numskins,
-		idpo_header.skinwidth,
-		idpo_header.skinheight,
-		idpo_header.numverts,
-		idpo_header.numtris,
-		idpo_header.numframes,
-		idpo_header.synctype,
-		idpo_header.flags,
-		idpo_header.size
-		);
-	*/
-	if (!dump_skins())
-		return;
+	num_skins=model.getNumSkins();
+	num_frames=model.getNumFrames();
 
-	if (!dump_points())
-		return;
+	model.getMinMax(&min,&max);
+	float min_length=Length(min);
+	float max_length=Length(max);
+	if (max_length>min_length)
+		length=max_length;
+	else
+		length=min_length;
 
-	if (!dump_triangles())
-	{
-		if (idpo_points)
-			free(idpo_points);
-		return;
-	}
+	camera_dist=length+zbuffer_min;
+	zbuffer_max=length*2+zbuffer_min;
 
-	convert();
-	if (idpo_points)
-		free(idpo_points);
-	if (idpo_triangles)
-		free(idpo_triangles);
-	
-	if (!dump_frames())
-		return;
-	
-	model.calculateNormals();
-	model.calculateBoundBoxes();
-	if (!model.verifyModel())
-		fprintf(stdout,"Model has wrong indexes.\n");
-	model.printInfo();
-
-	fclose(idpo_file);
+	auxInitPosition(0,0,400,300);
+	auxInitDisplayMode(AUX_RGB|AUX_DOUBLE);
+	if (auxInitWindow("view3d")==GL_FALSE)
+		auxQuit();
+	Init();
+	auxReshapeFunc((AUXRESHAPEPROC)Reshape);
+	auxMainLoop(Draw);
 }
-/*
-void main(void)
-{
-	const Vector3D min={0.0f,0.0f,0.0f};
-	const Vector3D max={1.0f,1.0f,0.0f};
-	const Vector3D vertices[]={{0.0f,0.0f,0.0f},{1.0f,0.0f,0.0f},{0.0f,1.0f,0.0f}};
-	const Vector3D normals[]={{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f}};
-	model.addFrame("triangle",min,max,3,vertices,normals);
-	model.addTriangle(model.addPoint(0,0,0),
-						model.addPoint(0,0,1),
-						model.addPoint(0,0,2));
-	model.calculateNormals();
-	model.printInfo();
-}
-*/
