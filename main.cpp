@@ -231,8 +231,8 @@ void main(int carg,char **varg)
 {
 	if (carg!=2)
 	{
-		fprintf(stdout,"view3d 1.0 (31-03-2003) by Stupin W.A.\n"
-						"Program for viewing Quake models with OpenGL.\n"
+		fprintf(stdout,"view3d 1.1 (08-04-2003) by Stupin W.A.\n"
+						"Program for viewing Quake models with using OpenGL.\n"
 						"Usage: view3d <model>\n"
 						"\t<model>\t- name of Quake MDL file.\n"
 						"Example: view3d quake\\id1\\pak0\\progs\\player.mdl\n"

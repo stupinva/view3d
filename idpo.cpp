@@ -15,11 +15,29 @@ struct RGB
 #endif
 
 const long IDPO_IDENT	=0x4F504449;
-const long IDPO_VERSION	=6;
 struct IDPOHeader
 {
 	unsigned long id;			// 0x4F504449 = "IDPO" for IDPOLYGON
-	unsigned long version;      // Version = 6
+	unsigned long version;      // Version = 3, 6
+};
+struct IDPO3InfoHeader
+{
+	Vector3D scale;             // Model scale factors.
+	Vector3D origin;            // Model origin.
+	float radius;				// Model bounding radius.
+	Vector3D offsets;           // Eye position (useless?)
+	unsigned long numskins ;    // the number of skin textures
+	unsigned long skinwidth;    // Width of skin texture
+		                        //           must be multiple of 8
+	unsigned long skinheight;   // Height of skin texture
+								//           must be multiple of 8
+	unsigned long numverts;     // Number of vertices
+	unsigned long numtris;		// Number of triangles surfaces
+	unsigned long numframes;    // Number of frames
+	unsigned long synctype;     // 0= synchron, 1= random
+};
+struct IDPO6InfoHeader
+{
 	Vector3D scale;             // Model scale factors.
 	Vector3D origin;            // Model origin.
 	float radius;				// Model bounding radius.
@@ -36,6 +54,8 @@ struct IDPOHeader
 	unsigned long flags;        // 0 (see Alias models)
 	float size;					// average size of triangles
 };
+const IDPO3_ON_SEAM	=0x01;
+const IDPO6_ON_SEAM	=0x20;
 struct IDPOPoint
 {
 	unsigned long onseam;				// 0 or 0x20
@@ -55,8 +75,13 @@ struct IDPOVertex
 	unsigned char packedposition[3];    // X,Y,Z coordinate, packed on 0-255
 	unsigned char lightnormalindex;     // index of the vertex normal
 };
+struct IDPO3FrameHeader
+{
+	IDPOVertex min;					// minimum values of X,Y,Z
+	IDPOVertex max;					// maximum values of X,Y,Z
+};
 const unsigned IDPO_MAX_FRAME_NAME	=16;
-struct IDPOFrameHeader
+struct IDPO6FrameHeader
 {
 	IDPOVertex min;					// minimum values of X,Y,Z
 	IDPOVertex max;					// maximum values of X,Y,Z
@@ -188,7 +213,8 @@ Vector3D quake_normals[162]={
 	};
 
 FILE *file;
-IDPOHeader header;
+IDPOHeader hdr;
+IDPO6InfoHeader header;
 Model *model;
 
 //loading simple and group skins
@@ -272,8 +298,12 @@ Vector3D *frame_vertices;
 Vector3D *frame_normals;
 bool loadIDPOFrame(void)
 {
-	IDPOFrameHeader frame_header;
-	if (fread(&frame_header,sizeof(IDPOFrameHeader),1,file)!=1)
+	unsigned frame_header_size=sizeof(IDPO6FrameHeader);
+	IDPO6FrameHeader frame_header;
+	memset(&frame_header,0,frame_header_size);
+	if (hdr.version==3)
+		frame_header_size=sizeof(IDPO3FrameHeader);
+	if (fread(&frame_header,frame_header_size,1,file)!=1)
 	{
 		free(frame_normals);
 		free(frame_vertices);
@@ -368,22 +398,32 @@ bool loadIDPO(Model *mdl,const char *file_name)
 		return false;
 	}
 //read and chek header
-	if (fread(&header,sizeof(header),1,file)!=1)
+	if (fread(&hdr,sizeof(hdr),1,file)!=1)
 	{
 		fclose(file);
 		fprintf(stderr,"Could not read header.\n");
 		return false;
 	}
-	if (header.id!=IDPO_IDENT)
+	if (hdr.id!=IDPO_IDENT)
 	{
 		fclose(file);
 		fprintf(stderr,"Is not a MDL file of Quake.\n");
 		return false;
 	}
-	if (header.version!=IDPO_VERSION)
+	if (hdr.version!=3 && hdr.version!=6)
 	{
 		fclose(file);
-		fprintf(stderr,"Not supported version of MDL file of Quake.\n");
+		fprintf(stderr,"Not supported version of MDL file of Quake (must be 3 or 6).\n");
+		return false;
+	}
+	unsigned header_size=sizeof(IDPO6InfoHeader);
+	memset(&header,0,header_size);
+	if (hdr.version==3)
+		header_size=sizeof(IDPO3InfoHeader);
+	if (fread(&header,header_size,1,file)!=1)
+	{
+		fclose(file);
+		fprintf(stderr,"Could not read header.\n");
 		return false;
 	}
 //read skins
@@ -518,6 +558,9 @@ bool loadIDPO(Model *mdl,const char *file_name)
 	//float f_height=(float)header.skinheight;
 	float f_width=(float)width;
 	float f_height=(float)height;
+	unsigned onseam=IDPO6_ON_SEAM;
+	if (hdr.version==3)
+		onseam=IDPO3_ON_SEAM;
 	for(i=0;i<num_tris;i++)
 	{
 		int point_indexes[3];
@@ -526,7 +569,7 @@ bool loadIDPO(Model *mdl,const char *file_name)
 			unsigned vertex_index=tris[i].vertices[j];
 			float s=(float)st_verts[vertex_index].s/f_width;
 			float t=(float)st_verts[vertex_index].t/f_height;
-			if ((!tris[i].facesfront)&&(st_verts[vertex_index].onseam==0x20))
+			if ((!tris[i].facesfront)&&(st_verts[vertex_index].onseam==onseam))
 				//s+=0.5f;
 				s+=(header.skinwidth>>1)/f_width;
 			point_indexes[j]=model->addPoint(s,t,vertex_index);
