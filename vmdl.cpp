@@ -60,7 +60,9 @@ Vector3D Normalize(Vector3D v0)
     float length = v0.x * v0.x + v0.y * v0.y + v0.z * v0.z;
     length = (float)sqrt(length);
     if (length < DELTA)
+    {
         return v0;
+    }
     v1.x = v0.x / length;
     v1.y = v0.y / length;
     v1.z = v0.z / length;
@@ -90,17 +92,29 @@ Model::Model(void)
 Model::~Model(void)
 {
     if (skins)
+    {
         free(skins);
+    }
     if (points)
+    {
         free(points);
+    }
     if (triangles)
+    {
         free(triangles);
+    }
     if (frames)
+    {
         free(frames);
+    }
     if (vertices)
+    {
         free(vertices);
+    }
     if (normals)
+    {
         free(normals);
+    }
 }
 
 bool Model::addSkin(unsigned width, unsigned height, RGB *data)
@@ -129,8 +143,12 @@ bool Model::addSkin(unsigned width, unsigned height, RGB *data)
 int Model::addPoint(float s, float t, unsigned vertex_index)
 {
     for(int i = 0; (unsigned)i < num_points; i++)
+    {
         if ((points[i].s == s) && (points[i].t == t) && (points[i].vertex_index == vertex_index))
+        {
             return i;
+        }
+    }
     i = num_points++;
     if ((points = (Point *)realloc(points, num_points * sizeof(Point))) == NULL)
     {
@@ -153,18 +171,24 @@ int Model::addTriangle(int point_index0, int point_index1, int point_index2)
     }
     for(int i = 0; (unsigned)i < num_triangles; i++)
     {
-        if ((triangles[i].point_indexes[0] == point_index0)&&
-            (triangles[i].point_indexes[1] == point_index1)&&
+        if ((triangles[i].point_indexes[0] == point_index0) &&
+            (triangles[i].point_indexes[1] == point_index1) &&
             (triangles[i].point_indexes[2] == point_index2))
+        {
             return i;
-        if ((triangles[i].point_indexes[0] == point_index1)&&
-            (triangles[i].point_indexes[1] == point_index2)&&
+        }
+        if ((triangles[i].point_indexes[0] == point_index1) &&
+            (triangles[i].point_indexes[1] == point_index2) &&
             (triangles[i].point_indexes[2] == point_index0))
+        {
             return i;
-        if ((triangles[i].point_indexes[0] == point_index2)&&
-            (triangles[i].point_indexes[1] == point_index0)&&
+        }
+        if ((triangles[i].point_indexes[0] == point_index2) &&
+            (triangles[i].point_indexes[1] == point_index0) &&
             (triangles[i].point_indexes[2] == point_index1))
+        {
             return i;
+        }
     }
     i = num_triangles++;
     if ((triangles = (Triangle *)realloc(triangles, num_triangles * sizeof(Triangle))) == NULL)
@@ -196,20 +220,30 @@ void Model::printInfo(void)
                     num_triangles, num_triangles * sizeof(Triangle),
                     num_vertices,
                     num_frames, num_frames * (num_vertices * 2 * sizeof(Vector3D) + sizeof(Frame)));
-    /*for(unsigned k = 0; k < num_skins; k++)
+    /*
+    for(unsigned k = 0; k < num_skins; k++)
+    {
         for(unsigned j = 0; j < skin_height; j++)
+        {
             for(unsigned i = 0; i < skin_width; i++)
             {
                 RGB color = skins[k * skin_height * skin_width + j * skin_width + i];
                 fprintf(stdout, "%X %X %X\n", color.red, color.green, color.blue);
-            }*/
+            }
+        }
+    }
+    */
     for(unsigned i = 0; i < num_points; i++)
+    {
         fprintf(stdout, "point\t%f\t%f\t%d\n", points[i].s, points[i].t, points[i].vertex_index);
+    }
     for(i = 0; i < num_triangles; i++)
+    {
         fprintf(stdout, "triangle\t%d\t%d\t%d\n",
                         triangles[i].point_indexes[0],
                         triangles[i].point_indexes[1],
                         triangles[i].point_indexes[2]);
+    }
     for(i = 0; i < num_frames; i++)
     {
         fprintf(stdout, "frame\t%s\n"
@@ -219,6 +253,7 @@ void Model::printInfo(void)
                         frames[i].min.x, frames[i].min.y, frames[i].min.z,
                         frames[i].max.x, frames[i].max.y, frames[i].max.z);
         for(unsigned j = 0; j < num_vertices; j++)
+        {
             fprintf(stdout, "vertex\t%f\t%f\t%f\n"
                             "normal\t%f\t%f\t%f\n",
                             vertices[i*num_vertices+j].x,
@@ -227,6 +262,7 @@ void Model::printInfo(void)
                             normals[i*num_vertices+j].x,
                             normals[i*num_vertices+j].y,
                             normals[i*num_vertices+j].z);
+        }
     }
 }
 
@@ -235,7 +271,9 @@ int Model::addFrame(const char *frame_name, const Vector3D min, const Vector3D m
                     const Vector3D *verts, const Vector3D *norms)
 {
     if (num_vertices == 0)
+    {
         num_vertices = numvertices;
+    }
     if (num_vertices != numvertices)
     {
         fprintf(stderr, "Could not add frame, wrong number of vertices.\n");
@@ -245,10 +283,14 @@ int Model::addFrame(const char *frame_name, const Vector3D min, const Vector3D m
     if ((frames = (Frame *)realloc(frames, num_frames * sizeof(Frame))) == NULL)
     {
         if (vertices)
+        {
             free(vertices);
+        }
         vertices = NULL;
         if (normals)
+        {
             free(normals);
+        }
         normals = NULL;
         num_frames = 0;
         fprintf(stderr, "Not enough memory, all frames, vertices and normals lost.\n");
@@ -259,7 +301,9 @@ int Model::addFrame(const char *frame_name, const Vector3D min, const Vector3D m
         free(frames);
         frames = NULL;
         if (normals)
+        {
             free(normals);
+        }
         normals = NULL;
         num_frames = 0;
         fprintf(stderr, "Not enough memory, all frames, vertices and normals lost.\n");
@@ -293,17 +337,29 @@ void Model::calculateBoundBoxes(void)
         {
             Vector3D vertex = vertices[j * num_vertices + i];
             if (min.x > vertex.x)
+            {
                 min.x = vertex.x;
+            }
             if (min.y > vertex.y)
+            {
                 min.y = vertex.y;
+            }
             if (min.z > vertex.z)
+            {
                 min.z = vertex.z;
+            }
             if (max.x < vertex.x)
+            {
                 max.x = vertex.x;
+            }
             if (max.y < vertex.y)
+            {
                 max.y = vertex.y;
+            }
             if (max.z < vertex.z)
+            {
                 max.z = vertex.z;
+            }
         }
         frames[j].min = min;
         frames[j].max = max;
@@ -318,7 +374,9 @@ bool Model::calculateNormals(void)
     }
     unsigned *normal_numbers;
     if ((normal_numbers = (unsigned *)malloc(num_vertices * sizeof(unsigned))) == NULL)
+    {
         return false;
+    }
     for(unsigned j = 0; j < num_frames; j++)
     {
         for(unsigned i = 0; i < num_vertices; i++)
@@ -355,9 +413,13 @@ bool Model::calculateNormals(void)
             normal_numbers[vertex_index2]++;
         }
         for(i = 0; i < num_vertices; i++)
+        {
             if (normal_numbers[i])
-                normals[j * num_vertices + i]=
+            {
+                normals[j * num_vertices + i] =
                     Normalize(Div(normals[j * num_vertices +i ], (float)normal_numbers[i]));
+            }
+        }
     }
     free(normal_numbers);
     return true;
@@ -366,13 +428,21 @@ bool Model::calculateNormals(void)
 bool Model::verifyModel(void)
 {
     for(unsigned i = 0; i < num_points; i++)
+    {
         if (points[i].vertex_index >= num_vertices)
+        {
             return false;
+        }
+    }
     for(i = 0; i < num_triangles; i++)
+    {
         if ((triangles[i].point_indexes[0] >= num_points) ||
             (triangles[i].point_indexes[1] >= num_points) ||
             (triangles[i].point_indexes[2] >= num_points))
+        {
             return false;
+        }
+    }
     return true;
 }
 unsigned Model::getNumFrames(void)
@@ -386,9 +456,13 @@ unsigned Model::getNumSkins(void)
 bool Model::drawModel(unsigned skin_index, unsigned frame_index, bool draw_skin, bool lighting)
 {
     if (frame_index >= num_frames)
+    {
         return false;
+    }
     if (skin_index >= num_skins)
+    {
         return false;
+    }
     Vector3D *frame_vertices = &vertices[frame_index * num_vertices];
     Vector3D *frame_normals = &normals[frame_index * num_vertices];
     if (draw_skin)
@@ -404,6 +478,7 @@ bool Model::drawModel(unsigned skin_index, unsigned frame_index, bool draw_skin,
         //                  &skins[skin_width * skin_height * skin_index]));
         glBegin(GL_TRIANGLES);
         if (lighting)
+        {
             for(unsigned i = 0; i < num_triangles; i++)
             {
                 Triangle triangle = triangles[i];
@@ -416,7 +491,9 @@ bool Model::drawModel(unsigned skin_index, unsigned frame_index, bool draw_skin,
                     glVertex3fv((const float *)&frame_vertices[vertex_index]);
                 }
             }
+        }
         else
+        {
             for(unsigned i = 0; i < num_triangles; i++)
             {
                 Triangle triangle = triangles[i];
@@ -428,12 +505,14 @@ bool Model::drawModel(unsigned skin_index, unsigned frame_index, bool draw_skin,
                     glVertex3fv((const float *)&frame_vertices[vertex_index]);
                 }
             }
+        }
         glEnd();
     }
     else
     {
         glBegin(GL_TRIANGLES);
         if (lighting)
+        {
             for(unsigned i = 0; i < num_triangles; i++)
             {
                 Triangle triangle = triangles[i];
@@ -444,7 +523,9 @@ bool Model::drawModel(unsigned skin_index, unsigned frame_index, bool draw_skin,
                     glVertex3fv((const float *)&frame_vertices[vertex_index]);
                 }
             }
+        }
         else
+        {
             for(unsigned i = 0; i < num_triangles; i++)
             {
                 Triangle triangle = triangles[i];
@@ -454,6 +535,7 @@ bool Model::drawModel(unsigned skin_index, unsigned frame_index, bool draw_skin,
                     glVertex3fv((const float *)&frame_vertices[vertex_index]);
                 }
             }
+        }
         glEnd();
     }
     return true;
@@ -461,7 +543,9 @@ bool Model::drawModel(unsigned skin_index, unsigned frame_index, bool draw_skin,
 bool Model::drawNormals(unsigned frame_index)
 {
     if (frame_index >= num_frames)
+    {
         return false;
+    }
 
     Vector3D *frame_vertices = &vertices[frame_index * num_vertices];
     Vector3D *frame_normals = &normals[frame_index * num_vertices];
@@ -486,16 +570,28 @@ void Model::getMinMax(Vector3D *min, Vector3D *max)
     for(unsigned i = 0; i < num_frames; i++)
     {
         if (min->x > frames[i].min.x)
+        {
             min->x = frames[i].min.x;
+        }
         if (min->y > frames[i].min.y)
+        {
             min->y = frames[i].min.y;
+        }
         if (min->z > frames[i].min.z)
+        {
             min->z = frames[i].min.z;
+        }
         if (max->x < frames[i].max.x)
+        {
             max->x = frames[i].max.x;
+        }
         if (max->y < frames[i].max.y)
+        {
             max->y = frames[i].max.y;
+        }
         if (max->z < frames[i].max.z)
+        {
             max->z = frames[i].max.z;
+        }
     }
 }

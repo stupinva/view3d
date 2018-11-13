@@ -88,7 +88,9 @@ static void CALLBACK Draw(void)
         glEnable(GL_LIGHT1);
     }
     else
+    {
         glDisable(GL_LIGHTING);
+    }
     if (draw_skin)
     {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -100,9 +102,13 @@ static void CALLBACK Draw(void)
         glShadeModel(GL_SMOOTH);
         
         if (lighting)
+        {
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+        }
         else
+        {
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+        }
     }
     else
     {
@@ -136,61 +142,81 @@ static void DistUp(void)
 {
     camera_dist -= 1.0f;
     if (camera_dist < zbuffer_min)
+    {
         camera_dist = zbuffer_min;
+    }
 }
 static void DistDown(void)
 {
     camera_dist += 1.0f;
     if (camera_dist > zbuffer_max)
+    {
         camera_dist = zbuffer_max;
+    }
 }
 static void PrevFrame(void)
 {
     frame_num--;
     if ((int)frame_num < 0)
+    {
         frame_num = 0;
+    }
 }
 static void NextFrame(void)
 {
     frame_num++;
     if (frame_num >= num_frames)
+    {
         frame_num = num_frames - 1;
+    }
 }
 static void PrevSkin(void)
 {
     skin_num--;
     if ((int)skin_num < 0)
+    {
         skin_num = 0;
+    }
 }
 static void NextSkin(void)
 {
     skin_num++;
     if (skin_num >= num_skins)
+    {
         skin_num = num_skins - 1;
+    }
 }
 static void YawUp(void)
 {
     camera_yaw += 1.0f;
     if (camera_yaw > 90.0f)
+    {
         camera_yaw = 90.0f;
+    }
 }
 static void YawDown(void)
 {
     camera_yaw -= 1.0f;
     if (camera_yaw < -90.0f)
+    {
         camera_yaw = -90.0f;
+    }
 }
 static void AngleRight(void)
 {
     camera_angle -= 1.0f;
     if (camera_angle < -180.0f)
+    {
         camera_angle += 360.0f;
+    }
 }
 static void AngleLeft(void)
 {
     camera_angle += 1.0f;
     if (camera_angle > 180.0f)
+    {
         camera_angle -= 360.0f;
+    }
 }
 void InitKeyboard(void)
 {
@@ -256,7 +282,9 @@ void main(int carg, char **varg)
         return;
     }
     if (!loadIDPO(&model, varg[1]))
+    {
         return;
+    }
     num_skins = model.getNumSkins();
     num_frames = model.getNumFrames();
 
@@ -264,9 +292,13 @@ void main(int carg, char **varg)
     float min_length = Length(min);
     float max_length = Length(max);
     if (max_length > min_length)
+    {
         length = max_length;
+    }
     else
+    {
         length = min_length;
+    }
 
     camera_dist = length + zbuffer_min;
     zbuffer_max = length * 2 + zbuffer_min;
@@ -274,7 +306,9 @@ void main(int carg, char **varg)
     auxInitPosition(0, 0, 400, 300);
     auxInitDisplayMode(AUX_RGB | AUX_DOUBLE);
     if (auxInitWindow("view3d") == GL_FALSE)
+    {
         auxQuit();
+    }
     Init();
     auxReshapeFunc((AUXRESHAPEPROC)Reshape);
     auxMainLoop(Draw);

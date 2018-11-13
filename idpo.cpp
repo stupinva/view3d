@@ -222,11 +222,14 @@ RGB *skin;
 bool loadIDPOSkin(void)
 {
     for(unsigned y = 0; y < header.skinheight; y++)
+    {
         for(unsigned x = 0; x < header.skinwidth; x++)
         {
             int index = fgetc(file);
             if (index != EOF)
+            {
                 skin[y * header.skinwidth + x] = quake_palette[index];
+            }
             else
             {
                 free(skin);
@@ -235,6 +238,7 @@ bool loadIDPOSkin(void)
                 return false;
             }
         }
+    }
     if (!model->addSkin(header.skinwidth, header.skinheight, skin))
     {
         free(skin);
@@ -242,15 +246,19 @@ bool loadIDPOSkin(void)
         return false;
     }
     return true;
-}*/
+}
+*/
 bool loadIDPOSkin(unsigned width, unsigned height)
 {
     for(unsigned y = 0; y < header.skinheight; y++)
+    {
         for(unsigned x = 0; x < header.skinwidth; x++)
         {
             int index = fgetc(file);
             if (index != EOF)
+            {
                 skin[y * width + x] = quake_palette[index];
+            }
             else
             {
                 free(skin);
@@ -259,6 +267,7 @@ bool loadIDPOSkin(unsigned width, unsigned height)
                 return false;
             }
         }
+    }
     if (!model->addSkin(width, height, skin))
     {
         free(skin);
@@ -301,7 +310,9 @@ bool loadIDPOFrame(void)
     IDPO6FrameHeader frame_header;
     memset(&frame_header, 0, frame_header_size);
     if (hdr.version == 3)
+    {
         frame_header_size = sizeof(IDPO3FrameHeader);
+    }
     if (fread(&frame_header, frame_header_size, 1, file) != 1)
     {
         free(frame_normals);
@@ -418,7 +429,9 @@ bool loadIDPO(Model *mdl, const char *file_name)
     unsigned header_size = sizeof(IDPO6InfoHeader);
     memset(&header, 0, header_size);
     if (hdr.version == 3)
+    {
         header_size = sizeof(IDPO3InfoHeader);
+    }
     if (fread(&header, header_size, 1, file) != 1)
     {
         fclose(file);
@@ -446,9 +459,12 @@ bool loadIDPO(Model *mdl, const char *file_name)
         }
         //fprintf(stdout, "group\t%d\n", group);
         if (group == 0)
+        {
             if (!loadIDPOSkin())
+            {
                 return false;
-            else;
+            }
+        }
         else if (group == 1)
         {
             if (!loadIDPOGroupHeader())
@@ -458,8 +474,12 @@ bool loadIDPO(Model *mdl, const char *file_name)
                 return false;
             }
             for(unsigned j = 0; j < nb; j++)
+            {
                 if (!loadIDPOSkin())
+                {
                     return false;
+                }
+            }
         }
         else
         {
@@ -474,9 +494,13 @@ bool loadIDPO(Model *mdl, const char *file_name)
     unsigned width = 1;
     unsigned height = 1;
     while (width < header.skinwidth)
+    {
         width <<= 1;
+    }
     while (height < header.skinheight)
+    {
         height <<= 1;
+    }
     if ((skin = (RGB *)malloc(width * height * sizeof(RGB))) == NULL)
     {
         fclose(file);
@@ -496,16 +520,25 @@ bool loadIDPO(Model *mdl, const char *file_name)
         }
         //fprintf(stdout, "group\t%d\n", group);
         if (group == 0)
+        {
             if (!loadIDPOSkin(width, height))
+            {
                 return false;
-            else;
+            }
+        }
         else if (group == 1)
         {
             if (!loadIDPOGroupSkinHeader())
+            {
                 return false;
+            }
             for(unsigned j = 0; j < nb; j++)
+            {
                 if (!loadIDPOSkin(width, height))
+                {
                     return false;
+                }
+            }
         }
         else
         {
@@ -559,7 +592,9 @@ bool loadIDPO(Model *mdl, const char *file_name)
     float f_height = (float)height;
     unsigned onseam = IDPO6_ON_SEAM;
     if (hdr.version == 3)
+    {
         onseam = IDPO3_ON_SEAM;
+    }
     for(i = 0; i < num_tris; i++)
     {
         int point_indexes[3];
@@ -569,8 +604,10 @@ bool loadIDPO(Model *mdl, const char *file_name)
             float s = (float)st_verts[vertex_index].s / f_width;
             float t = (float)st_verts[vertex_index].t / f_height;
             if ((!tris[i].facesfront) && (st_verts[vertex_index].onseam == onseam))
+            {
                 //s += 0.5f;
                 s += (header.skinwidth >> 1) / f_width;
+            }
             point_indexes[j] = model->addPoint(s, t, vertex_index);
         }
         if (model->addTriangle(point_indexes[0], point_indexes[1], point_indexes[2]) == -1)
@@ -610,16 +647,25 @@ bool loadIDPO(Model *mdl, const char *file_name)
         }
         //fprintf(stdout, "group\t%d\n", group);
         if (group == 0)
+        {
             if (!loadIDPOFrame())
+            {
                 return false;
-            else;
+            }
+        }
         else if (group == 1)
         {
             if (!loadIDPOGroupFrameHeader())
+            {
                 return false;
+            }
             for(unsigned j = 0; j < nb; j++)
+            {
                 if (!loadIDPOFrame())
+                {
                     return false;
+                }
+            }
         }
         else
         {
@@ -636,7 +682,9 @@ bool loadIDPO(Model *mdl, const char *file_name)
 //and last...
 //calculate normals and bound boxes
     if (!model->calculateNormals())
+    {
         return false;
+    }
     model->calculateBoundBoxes();
 //verify model
     if (!model->verifyModel())
