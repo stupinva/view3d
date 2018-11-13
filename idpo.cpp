@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "vmdl.h"
-//#include <string.h>
 
 #ifndef __RGB__
 #define __RGB__
