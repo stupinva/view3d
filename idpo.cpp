@@ -3,16 +3,6 @@
 #include <string.h>
 #include "vmdl.h"
 
-#ifndef __RGB__
-#define __RGB__
-struct RGB
-{
-    unsigned char red;
-    unsigned char green;
-    unsigned char blue;
-};
-#endif
-
 const long IDPO_IDENT = 0x4F504449;
 struct IDPOHeader
 {
