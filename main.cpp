@@ -34,6 +34,7 @@ unsigned num_frames = 0;
 unsigned frame_num = 0;
 
 Model model;
+
 static void CALLBACK Draw(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -91,6 +92,7 @@ static void CALLBACK Draw(void)
     {
         glDisable(GL_LIGHTING);
     }
+
     if (draw_skin)
     {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -115,7 +117,9 @@ static void CALLBACK Draw(void)
         glDisable(GL_TEXTURE_2D);
         glColor3f(1.0f, 1.0f, 1.0f);
     }
+
     model.drawModel(skin_num, frame_num, draw_skin, lighting);
+
     if (draw_normals)
     {
         glDisable(GL_TEXTURE_2D);
@@ -126,18 +130,22 @@ static void CALLBACK Draw(void)
     glFinish();
     auxSwapBuffers();
 }
+
 static void SwitchDrawSkin(void)
 {
     draw_skin = !draw_skin;
 }
+
 static void SwitchLighting(void)
 {
     lighting = !lighting;
 }
+
 static void SwitchDrawNormals(void)
 {
     draw_normals = !draw_normals;
 }
+
 static void DistUp(void)
 {
     camera_dist -= 1.0f;
@@ -146,6 +154,7 @@ static void DistUp(void)
         camera_dist = zbuffer_min;
     }
 }
+
 static void DistDown(void)
 {
     camera_dist += 1.0f;
@@ -154,6 +163,7 @@ static void DistDown(void)
         camera_dist = zbuffer_max;
     }
 }
+
 static void PrevFrame(void)
 {
     frame_num--;
@@ -162,6 +172,7 @@ static void PrevFrame(void)
         frame_num = 0;
     }
 }
+
 static void NextFrame(void)
 {
     frame_num++;
@@ -170,6 +181,7 @@ static void NextFrame(void)
         frame_num = num_frames - 1;
     }
 }
+
 static void PrevSkin(void)
 {
     skin_num--;
@@ -178,6 +190,7 @@ static void PrevSkin(void)
         skin_num = 0;
     }
 }
+
 static void NextSkin(void)
 {
     skin_num++;
@@ -186,6 +199,7 @@ static void NextSkin(void)
         skin_num = num_skins - 1;
     }
 }
+
 static void YawUp(void)
 {
     camera_yaw += 1.0f;
@@ -194,6 +208,7 @@ static void YawUp(void)
         camera_yaw = 90.0f;
     }
 }
+
 static void YawDown(void)
 {
     camera_yaw -= 1.0f;
@@ -202,6 +217,7 @@ static void YawDown(void)
         camera_yaw = -90.0f;
     }
 }
+
 static void AngleRight(void)
 {
     camera_angle -= 1.0f;
@@ -210,6 +226,7 @@ static void AngleRight(void)
         camera_angle += 360.0f;
     }
 }
+
 static void AngleLeft(void)
 {
     camera_angle += 1.0f;
@@ -218,6 +235,7 @@ static void AngleLeft(void)
         camera_angle -= 360.0f;
     }
 }
+
 void InitKeyboard(void)
 {
     auxKeyFunc(AUX_q, (AUXKEYPROC)DistUp);
@@ -245,6 +263,7 @@ static void Init(void)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 }
+
 static void CALLBACK Reshape(unsigned width, unsigned height)
 {
     glViewport(0, 0, width, height);
@@ -253,6 +272,7 @@ static void CALLBACK Reshape(unsigned width, unsigned height)
     camera_half_width = (float)width / (float)height * length * zbuffer_min / camera_dist;
     camera_half_height = length*zbuffer_min / camera_dist;
 }
+
 void main(int carg, char **varg)
 {
     if (carg != 2)
@@ -281,10 +301,12 @@ void main(int carg, char **varg)
                         "\t\tDown arrow\t- rotate camera down.\n");
         return;
     }
+
     if (!loadIDPO(&model, varg[1]))
     {
         return;
     }
+
     num_skins = model.getNumSkins();
     num_frames = model.getNumFrames();
 

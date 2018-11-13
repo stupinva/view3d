@@ -9,6 +9,7 @@ struct IDPOHeader
     unsigned long id;      // 0x4F504449 = "IDPO" for IDPOLYGON
     unsigned long version; // Version = 3, 6
 };
+
 struct IDPO3InfoHeader
 {
     Vector3D scale;           // Model scale factors.
@@ -25,6 +26,7 @@ struct IDPO3InfoHeader
     unsigned long numframes;  // Number of frames
     unsigned long synctype;   // 0 = synchron, 1 = random
 };
+
 struct IDPO6InfoHeader
 {
     Vector3D scale;           // Model scale factors.
@@ -43,6 +45,7 @@ struct IDPO6InfoHeader
     unsigned long flags;      // 0 (see Alias models)
     float size;               // average size of triangles
 };
+
 const IDPO3_ON_SEAM = 0x01;
 const IDPO6_ON_SEAM = 0x20;
 struct IDPOPoint
@@ -53,22 +56,26 @@ struct IDPOPoint
     unsigned long t;      // position, vertically
                           //     in range [0, skinheight)
 };
+
 struct IDPOTriangle
 {
     unsigned long facesfront;  // boolean
     unsigned long vertices[3]; // Index of 3 triangle vertices
                                //     in range [0, numverts)
 };
+
 struct IDPOVertex
 {
     unsigned char packedposition[3]; // X, Y, Z coordinate, packed on 0-255
     unsigned char lightnormalindex;  // index of the vertex normal
 };
+
 struct IDPO3FrameHeader
 {
     IDPOVertex min; // minimum values of X, Y, Z
     IDPOVertex max; // maximum values of X, Y, Z
 };
+
 const unsigned IDPO_MAX_FRAME_NAME = 16;
 struct IDPO6FrameHeader
 {
@@ -208,6 +215,7 @@ Model *model;
 
 //loading simple and group skins
 RGB *skin;
+
 /*
 bool loadIDPOSkin(void)
 {
@@ -229,6 +237,7 @@ bool loadIDPOSkin(void)
             }
         }
     }
+
     if (!model->addSkin(header.skinwidth, header.skinheight, skin))
     {
         free(skin);
@@ -238,6 +247,7 @@ bool loadIDPOSkin(void)
     return true;
 }
 */
+
 bool loadIDPOSkin(unsigned width, unsigned height)
 {
     for(unsigned y = 0; y < header.skinheight; y++)
@@ -258,6 +268,7 @@ bool loadIDPOSkin(unsigned width, unsigned height)
             }
         }
     }
+
     if (!model->addSkin(width, height, skin))
     {
         free(skin);
@@ -266,6 +277,7 @@ bool loadIDPOSkin(unsigned width, unsigned height)
     }
     return true;
 }
+
 unsigned long nb;
 bool loadIDPOGroupSkinHeader(void)
 {
@@ -276,6 +288,7 @@ bool loadIDPOGroupSkinHeader(void)
         fprintf(stderr, "Could not read nb field.\n");
         return false;
     }
+
     //fprintf(stdout, "nb\t%d\n", nb);
     for(unsigned j = 0; j < nb; j++)
     {
@@ -291,6 +304,7 @@ bool loadIDPOGroupSkinHeader(void)
     }
     return true;
 }
+
 //loading simple and group frames
 Vector3D *frame_vertices;
 Vector3D *frame_normals;
@@ -303,6 +317,7 @@ bool loadIDPOFrame(void)
     {
         frame_header_size = sizeof(IDPO3FrameHeader);
     }
+
     if (fread(&frame_header, frame_header_size, 1, file) != 1)
     {
         free(frame_normals);
@@ -311,6 +326,7 @@ bool loadIDPOFrame(void)
         fprintf(stderr, "Could not read frame header.\n");
         return false;
     }
+
     for(unsigned vertex_index = 0; vertex_index < header.numverts; vertex_index++)
     {
         IDPOVertex vertex;
@@ -327,6 +343,7 @@ bool loadIDPOFrame(void)
         frame_vertices[vertex_index].z = vertex.packedposition[2] * header.scale.z + header.origin.z;
         frame_normals[vertex_index] = quake_normals[vertex.lightnormalindex];
     }
+
     Vector3D min;
     Vector3D max;
     min.x = frame_header.min.packedposition[0] * header.scale.x + header.origin.x;
@@ -344,6 +361,7 @@ bool loadIDPOFrame(void)
     }
     return true;
 }
+
 bool loadIDPOGroupFrameHeader(void)
 {
     if (fread(&nb, sizeof(nb), 1, file) != 1)
@@ -354,6 +372,7 @@ bool loadIDPOGroupFrameHeader(void)
         fclose(file);
         return false;
     }
+
     IDPOVertex min;
     if (fread(&min, sizeof(min), 1, file) != 1)
     {
@@ -363,6 +382,7 @@ bool loadIDPOGroupFrameHeader(void)
         fprintf(stderr, "Could not read group frame min field.\n");
         return false;
     }
+
     IDPOVertex max;
     if (fread(&max, sizeof(max), 1, file) != 1)
     {
@@ -372,6 +392,7 @@ bool loadIDPOGroupFrameHeader(void)
         fprintf(stderr, "Could not read group frame max field.\n");
         return false;
     }
+
     //fprintf(stdout, "nb\t%d\n", nb);
     for(unsigned j = 0; j < nb; j++)
     {
@@ -388,9 +409,11 @@ bool loadIDPOGroupFrameHeader(void)
     }
     return true;
 }
+
 bool loadIDPO(Model *mdl, const char *file_name)
 {
     model = mdl;
+
 //open file
     file = fopen(file_name, "rb");
     if (file == NULL)
@@ -398,6 +421,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         fprintf(stderr, "Could not open file %s.\n", file_name);
         return false;
     }
+
 //read and chek header
     if (fread(&hdr, sizeof(hdr), 1, file) != 1)
     {
@@ -405,30 +429,35 @@ bool loadIDPO(Model *mdl, const char *file_name)
         fprintf(stderr, "Could not read header.\n");
         return false;
     }
+
     if (hdr.id != IDPO_IDENT)
     {
         fclose(file);
         fprintf(stderr, "Is not a MDL file of Quake.\n");
         return false;
     }
+
     if (hdr.version != 3 && hdr.version != 6)
     {
         fclose(file);
         fprintf(stderr, "Not supported version of MDL file of Quake (must be 3 or 6).\n");
         return false;
     }
+
     unsigned header_size = sizeof(IDPO6InfoHeader);
     memset(&header, 0, header_size);
     if (hdr.version == 3)
     {
         header_size = sizeof(IDPO3InfoHeader);
     }
+
     if (fread(&header, header_size, 1, file) != 1)
     {
         fclose(file);
         fprintf(stderr, "Could not read header.\n");
         return false;
     }
+
 //read skins
 /*
     skin = (RGB *)malloc(header.skinwidth * header.skinheight * sizeof(RGB));
@@ -438,6 +467,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         fprintf(stderr, "Could not get memory for skin.\n");
         return false;
     }
+
     memset(skin, 0, header.skinwidth * header.skinheight * sizeof(RGB));
     for(unsigned i = 0; i < header.numskins; i++)
     {
@@ -449,6 +479,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
             fprintf(stderr, "Could not read group field.\n");
             return false;
         }
+
         //fprintf(stdout, "group\t%d\n", group);
         if (group == 0)
         {
@@ -483,6 +514,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
     }
     free(skin);
 */
+
     unsigned width = 1;
     unsigned height = 1;
     while (width < header.skinwidth)
@@ -493,6 +525,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
     {
         height <<= 1;
     }
+
     skin = (RGB *)malloc(width * height * sizeof(RGB));
     if (skin == NULL)
     {
@@ -500,6 +533,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         fprintf(stderr, "Could not get memory for skin.\n");
         return false;
     }
+
     memset(skin, 0, width * height * sizeof(RGB));
     for(unsigned i = 0; i < header.numskins; i++)
     {
@@ -511,6 +545,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
             fprintf(stderr, "Could not read group field.\n");
             return false;
         }
+
         //fprintf(stdout, "group\t%d\n", group);
         if (group == 0)
         {
@@ -542,6 +577,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         }
     }
     free(skin);
+
 //read points    
     unsigned num_st_verts;
     IDPOPoint *st_verts = (IDPOPoint *)malloc(header.numverts * sizeof(IDPOPoint));
@@ -551,6 +587,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         fprintf(stderr, "Could not get memory for stverts.\n");
         return false;
     }
+
     if (fread(st_verts, header.numverts * sizeof(IDPOPoint), 1, file) != 1)
     {
         free(st_verts);
@@ -559,6 +596,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         return false;
     }
     num_st_verts = header.numverts;
+
 //read triangles
     unsigned num_tris;
     IDPOTriangle *tris = (IDPOTriangle *)malloc(header.numtris * sizeof(IDPOTriangle));
@@ -569,6 +607,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         fprintf(stderr, "Could not get memory for triangles.\n");
         return false;
     }
+
     if (fread(tris, header.numtris * sizeof(IDPOTriangle), 1, file) != 1)
     {
         free(st_verts);
@@ -578,6 +617,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         return false;
     }
     num_tris = header.numtris;
+
 //convert st_verts to points and tris to triangles
     //float f_width = (float)header.skinwidth;
     //float f_height = (float)header.skinheight;
@@ -588,6 +628,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
     {
         onseam = IDPO3_ON_SEAM;
     }
+
     for(i = 0; i < num_tris; i++)
     {
         int point_indexes[3];
@@ -603,6 +644,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
             }
             point_indexes[j] = model->addPoint(s, t, vertex_index);
         }
+
         if (model->addTriangle(point_indexes[0], point_indexes[1], point_indexes[2]) == -1)
         {
             free(st_verts);
@@ -613,6 +655,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
     }
     free(st_verts);
     free(tris);
+
 //read frames
     frame_vertices = (Vector3D *)malloc(header.numverts * sizeof(Vector3D));
     if (frame_vertices == NULL)
@@ -621,6 +664,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         fprintf(stderr, "Could not get memory for frame vertices.\n");
         return false;
     }
+
     frame_normals = (Vector3D *)malloc(header.numverts * sizeof(Vector3D));
     if (frame_normals == NULL)
     {
@@ -629,6 +673,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         fprintf(stderr, "Could not get memory for frame normals.\n");
         return false;
     }
+
     for(i = 0; i < header.numframes; i++)
     {
         unsigned long group;
@@ -640,6 +685,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
             fprintf(stderr, "Could not read group field.\n");
             return false;
         }
+
         //fprintf(stdout, "group\t%d\n", group);
         if (group == 0)
         {
@@ -674,6 +720,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
     free(frame_normals);
     free(frame_vertices);
     fclose(file);
+
 //and last...
 //calculate normals and bound boxes
     if (!model->calculateNormals())
@@ -681,12 +728,14 @@ bool loadIDPO(Model *mdl, const char *file_name)
         return false;
     }
     model->calculateBoundBoxes();
+
 //verify model
     if (!model->verifyModel())
     {
         fprintf(stderr, "Warning: Model has wrong indexes.\n");
         return false;
     }
+
 //dump loaded model
     //model->printInfo();
     return true;

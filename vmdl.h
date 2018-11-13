@@ -56,6 +56,7 @@ class Model
     unsigned num_vertices;
     Vector3D *vertices;
     Vector3D *normals;
+
 public:
     Model(void);
     ~Model(void);
@@ -77,6 +78,7 @@ public:
     friend bool loadIDPO(Model *model, const char *file_name);
     void getMinMax(Vector3D *min, Vector3D *max);
 };
+
 Vector3D CrossProduct(Vector3D v0, Vector3D v1);
 Vector3D Add(Vector3D v0, Vector3D v1);
 Vector3D Sub(Vector3D v0, Vector3D v1);
