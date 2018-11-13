@@ -72,7 +72,7 @@ public:
     unsigned getNumSkins(void);
     unsigned getNumFrames(void);
     bool drawModel(unsigned skin_index, unsigned frame_index, bool draw_skin, bool lighting);
-    bool Model::drawNormals(unsigned frame_index);
+    bool drawNormals(unsigned frame_index);
     //bool drawModel(unsigned skin_index, unsigned frame_index);
     friend bool loadIDPO(Model *model, const char *file_name);
     void getMinMax(Vector3D *min, Vector3D *max);
