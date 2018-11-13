@@ -3,8 +3,8 @@
 #include <string.h>
 #include <math.h>
 #include <windows.h>
-#include <gl\gl.h>
-#include <gl\glu.h>
+#include <gl/gl.h>
+#include <gl/glu.h>
 #include "vmdl.h"
 
 Vector3D CrossProduct(Vector3D v0,Vector3D v1)

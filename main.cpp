@@ -1,7 +1,7 @@
 #include <windows.h>
-#include <gl\gl.h>
-#include <gl\glu.h>
-#include <gl\glaux.h>
+#include <gl/gl.h>
+#include <gl/glu.h>
+#include <gl/glaux.h>
 #include <math.h>
 #include <stdio.h>
 #include "vmdl.h"
@@ -235,7 +235,7 @@ void main(int carg,char **varg)
 						"Program for viewing Quake models with using OpenGL.\n"
 						"Usage: view3d <model>\n"
 						"\t<model>\t- name of Quake MDL file.\n"
-						"Example: view3d quake\\id1\\pak0\\progs\\player.mdl\n"
+						"Example: view3d quake/id1/pak0/progs/player.mdl\n"
 						"Hot keys:\n"
 						"\tModel:\n"
 						"\t\tz\t\t- switch to previous model frame,\n"
