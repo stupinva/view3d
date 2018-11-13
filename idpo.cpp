@@ -402,7 +402,8 @@ bool loadIDPO(Model *mdl, const char *file_name)
 {
     model = mdl;
 //open file
-    if ((file = fopen(file_name, "rb")) == NULL)
+    file = fopen(file_name, "rb");
+    if (file == NULL)
     {
         fprintf(stderr, "Could not open file %s.\n", file_name);
         return false;
@@ -440,7 +441,8 @@ bool loadIDPO(Model *mdl, const char *file_name)
     }
 //read skins
 /*
-    if ((skin = (RGB *)malloc(header.skinwidth * header.skinheight * sizeof(RGB))) == NULL)
+    skin = (RGB *)malloc(header.skinwidth * header.skinheight * sizeof(RGB));
+    if (skin == NULL)
     {
         fclose(file);
         fprintf(stderr, "Could not get memory for skin.\n");
@@ -501,7 +503,8 @@ bool loadIDPO(Model *mdl, const char *file_name)
     {
         height <<= 1;
     }
-    if ((skin = (RGB *)malloc(width * height * sizeof(RGB))) == NULL)
+    skin = (RGB *)malloc(width * height * sizeof(RGB));
+    if (skin == NULL)
     {
         fclose(file);
         fprintf(stderr, "Could not get memory for skin.\n");
@@ -551,8 +554,8 @@ bool loadIDPO(Model *mdl, const char *file_name)
     free(skin);
 //read points    
     unsigned num_st_verts;
-    IDPOPoint *st_verts;
-    if ((st_verts = (IDPOPoint *)malloc(header.numverts * sizeof(IDPOPoint))) == NULL)
+    IDPOPoint *st_verts = (IDPOPoint *)malloc(header.numverts * sizeof(IDPOPoint));
+    if (st_verts == NULL)
     {
         fclose(file);
         fprintf(stderr, "Could not get memory for stverts.\n");
@@ -568,8 +571,8 @@ bool loadIDPO(Model *mdl, const char *file_name)
     num_st_verts = header.numverts;
 //read triangles
     unsigned num_tris;
-    IDPOTriangle *tris;
-    if ((tris = (IDPOTriangle *)malloc(header.numtris * sizeof(IDPOTriangle))) == NULL)
+    IDPOTriangle *tris = (IDPOTriangle *)malloc(header.numtris * sizeof(IDPOTriangle));
+    if (tris == NULL)
     {
         free(st_verts);
         fclose(file);
@@ -621,13 +624,15 @@ bool loadIDPO(Model *mdl, const char *file_name)
     free(st_verts);
     free(tris);
 //read frames
-    if ((frame_vertices = (Vector3D *)malloc(header.numverts * sizeof(Vector3D))) == NULL)
+    frame_vertices = (Vector3D *)malloc(header.numverts * sizeof(Vector3D));
+    if (frame_vertices == NULL)
     {
         fclose(file);
         fprintf(stderr, "Could not get memory for frame vertices.\n");
         return false;
     }
-    if ((frame_normals = (Vector3D *)malloc(header.numverts * sizeof(Vector3D))) == NULL)
+    frame_normals = (Vector3D *)malloc(header.numverts * sizeof(Vector3D));
+    if (frame_normals == NULL)
     {
         free(frame_vertices);
         fclose(file);

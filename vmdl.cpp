@@ -130,7 +130,8 @@ bool Model::addSkin(unsigned width, unsigned height, RGB *data)
         return false;
     }
     int i = num_skins++;
-    if ((skins=(RGB *)realloc(skins, skin_width * skin_height * num_skins * sizeof(RGB))) == NULL)
+    skins = (RGB *)realloc(skins, skin_width * skin_height * num_skins * sizeof(RGB));
+    if (skins == NULL)
     {
         num_skins = 0;
         fprintf(stderr, "Not enough memory, all skins lost.\n");
@@ -150,7 +151,8 @@ int Model::addPoint(float s, float t, unsigned vertex_index)
         }
     }
     i = num_points++;
-    if ((points = (Point *)realloc(points, num_points * sizeof(Point))) == NULL)
+    points = (Point *)realloc(points, num_points * sizeof(Point));
+    if (points == NULL)
     {
         num_points = 0;
         fprintf(stderr, "Not enough memory, all points lost.\n");
@@ -191,7 +193,8 @@ int Model::addTriangle(int point_index0, int point_index1, int point_index2)
         }
     }
     i = num_triangles++;
-    if ((triangles = (Triangle *)realloc(triangles, num_triangles * sizeof(Triangle))) == NULL)
+    triangles = (Triangle *)realloc(triangles, num_triangles * sizeof(Triangle));
+    if (triangles == NULL)
     {
         num_triangles = 0;
         fprintf(stderr, "Not enough memory, all triangles lost.\n");
@@ -280,7 +283,8 @@ int Model::addFrame(const char *frame_name, const Vector3D min, const Vector3D m
         return false;
     }
     unsigned i = num_frames++;
-    if ((frames = (Frame *)realloc(frames, num_frames * sizeof(Frame))) == NULL)
+    frames = (Frame *)realloc(frames, num_frames * sizeof(Frame));
+    if (frames == NULL)
     {
         if (vertices)
         {
@@ -296,7 +300,8 @@ int Model::addFrame(const char *frame_name, const Vector3D min, const Vector3D m
         fprintf(stderr, "Not enough memory, all frames, vertices and normals lost.\n");
         return -1;
     }
-    if ((vertices = (Vector3D *)realloc(vertices, num_frames * num_vertices * sizeof(Vector3D))) == NULL)
+    vertices = (Vector3D *)realloc(vertices, num_frames * num_vertices * sizeof(Vector3D));
+    if (vertices == NULL)
     {
         free(frames);
         frames = NULL;
@@ -309,7 +314,8 @@ int Model::addFrame(const char *frame_name, const Vector3D min, const Vector3D m
         fprintf(stderr, "Not enough memory, all frames, vertices and normals lost.\n");
         return -1;
     }
-    if ((normals = (Vector3D *)realloc(normals, num_frames * num_vertices * sizeof(Vector3D))) == NULL)
+    normals = (Vector3D *)realloc(normals, num_frames * num_vertices * sizeof(Vector3D));
+    if (normals == NULL)
     {
         free(frames);
         frames = NULL;
@@ -372,8 +378,8 @@ bool Model::calculateNormals(void)
         fprintf(stderr, "Not enough memory.\n");
         return false;
     }
-    unsigned *normal_numbers;
-    if ((normal_numbers = (unsigned *)malloc(num_vertices * sizeof(unsigned))) == NULL)
+    unsigned *normal_numbers = (unsigned *)malloc(num_vertices * sizeof(unsigned));
+    if (normal_numbers == NULL)
     {
         return false;
     }
