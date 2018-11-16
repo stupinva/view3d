@@ -4,7 +4,9 @@
 #include "vmdl.h"
 
 const float ZBUFFER_MIN = 10.0f;
+#ifndef M_PI
 const float M_PI = 3.14159265f;
+#endif
 
 float zbuffer_min;
 float zbuffer_max;
