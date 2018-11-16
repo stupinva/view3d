@@ -4,12 +4,15 @@
 #include "vmdl.h"
 
 const long IDPO_IDENT = 0x4F504449;
+#pragma pack(push, 1)
 struct IDPOHeader
 {
     unsigned long id;      // 0x4F504449 = "IDPO" for IDPOLYGON
     unsigned long version; // Version = 3, 6
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct IDPO3InfoHeader
 {
     Vector3D scale;           // Model scale factors.
@@ -26,7 +29,9 @@ struct IDPO3InfoHeader
     unsigned long numframes;  // Number of frames
     unsigned long synctype;   // 0 = synchron, 1 = random
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct IDPO6InfoHeader
 {
     Vector3D scale;           // Model scale factors.
@@ -45,9 +50,11 @@ struct IDPO6InfoHeader
     unsigned long flags;      // 0 (see Alias models)
     float size;               // average size of triangles
 };
+#pragma pack(pop)
 
 const IDPO3_ON_SEAM = 0x01;
 const IDPO6_ON_SEAM = 0x20;
+#pragma pack(push, 1)
 struct IDPOPoint
 {
     unsigned long onseam; // 0 or 0x20
@@ -56,33 +63,42 @@ struct IDPOPoint
     unsigned long t;      // position, vertically
                           //     in range [0, skinheight)
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct IDPOTriangle
 {
     unsigned long facesfront;  // boolean
     unsigned long vertices[3]; // Index of 3 triangle vertices
                                //     in range [0, numverts)
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct IDPOVertex
 {
     unsigned char packedposition[3]; // X, Y, Z coordinate, packed on 0-255
     unsigned char lightnormalindex;  // index of the vertex normal
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct IDPO3FrameHeader
 {
     IDPOVertex min; // minimum values of X, Y, Z
     IDPOVertex max; // maximum values of X, Y, Z
 };
+#pragma pack(pop)
 
 const unsigned IDPO_MAX_FRAME_NAME = 16;
+#pragma pack(push, 1)
 struct IDPO6FrameHeader
 {
     IDPOVertex min;                 // minimum values of X, Y, Z
     IDPOVertex max;                 // maximum values of X, Y, Z
     char name[IDPO_MAX_FRAME_NAME]; // name of frame
 };
+#pragma pack(pop)
 
 const RGB quake_palette[] = {
     {0x00, 0x00, 0x00}, {0x0F, 0x0F, 0x0F}, {0x1F, 0x1F, 0x1F}, {0x2F, 0x2F, 0x2F},

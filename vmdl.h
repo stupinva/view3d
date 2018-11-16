@@ -3,12 +3,14 @@
 
 #ifndef __RGB__
 #define __RGB__
+#pragma pack(push, 1)
 struct RGB
 {
     unsigned char red;
     unsigned char green;
     unsigned char blue;
 };
+#pragma pack(pop)
 #endif
 
 struct Point
