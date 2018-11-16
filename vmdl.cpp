@@ -156,7 +156,7 @@ bool Model::addSkin(unsigned width, unsigned height, RGB *data)
 
 int Model::addPoint(float s, float t, unsigned vertex_index)
 {
-    for(int i = 0; (unsigned)i < num_points; i++)
+    for(unsigned i = 0; i < num_points; i++)
     {
         if ((points[i].s == s) && (points[i].t == t) && (points[i].vertex_index == vertex_index))
         {
@@ -164,7 +164,7 @@ int Model::addPoint(float s, float t, unsigned vertex_index)
         }
     }
 
-    i = num_points++;
+    unsigned i = num_points++;
     points = (Point *)realloc(points, num_points * sizeof(Point));
     if (points == NULL)
     {
@@ -186,7 +186,7 @@ int Model::addTriangle(int point_index0, int point_index1, int point_index2)
         return -1;
     }
 
-    for(int i = 0; (unsigned)i < num_triangles; i++)
+    for(unsigned i = 0; i < num_triangles; i++)
     {
         if ((triangles[i].point_indexes[0] == point_index0) &&
             (triangles[i].point_indexes[1] == point_index1) &&
@@ -210,7 +210,7 @@ int Model::addTriangle(int point_index0, int point_index1, int point_index2)
         }
     }
 
-    i = num_triangles++;
+    unsigned i = num_triangles++;
     triangles = (Triangle *)realloc(triangles, num_triangles * sizeof(Triangle));
     if (triangles == NULL)
     {
@@ -261,7 +261,7 @@ void Model::printInfo(void)
         fprintf(stdout, "point\t%f\t%f\t%d\n", points[i].s, points[i].t, points[i].vertex_index);
     }
 
-    for(i = 0; i < num_triangles; i++)
+    for(unsigned i = 0; i < num_triangles; i++)
     {
         fprintf(stdout, "triangle\t%d\t%d\t%d\n",
                         triangles[i].point_indexes[0],
@@ -269,7 +269,7 @@ void Model::printInfo(void)
                         triangles[i].point_indexes[2]);
     }
 
-    for(i = 0; i < num_frames; i++)
+    for(unsigned i = 0; i < num_frames; i++)
     {
         fprintf(stdout, "frame\t%s\n"
                         "min\t%f\t%f\t%f\n"
@@ -429,7 +429,7 @@ bool Model::calculateNormals(void)
             normal_numbers[i] = 0;
         }
 
-        for(i = 0; i < num_triangles; i++)
+        for(unsigned i = 0; i < num_triangles; i++)
         {
             unsigned vertex_index0 = points[triangles[i].point_indexes[0]].vertex_index;
             unsigned vertex_index1 = points[triangles[i].point_indexes[1]].vertex_index;
@@ -456,7 +456,7 @@ bool Model::calculateNormals(void)
             normal_numbers[vertex_index2]++;
         }
 
-        for(i = 0; i < num_vertices; i++)
+        for(unsigned i = 0; i < num_vertices; i++)
         {
             if (normal_numbers[i])
             {
@@ -479,7 +479,7 @@ bool Model::verifyModel(void)
         }
     }
 
-    for(i = 0; i < num_triangles; i++)
+    for(unsigned i = 0; i < num_triangles; i++)
     {
         if ((triangles[i].point_indexes[0] >= num_points) ||
             (triangles[i].point_indexes[1] >= num_points) ||

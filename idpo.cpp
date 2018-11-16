@@ -629,7 +629,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         onseam = IDPO3_ON_SEAM;
     }
 
-    for(i = 0; i < num_tris; i++)
+    for(unsigned i = 0; i < num_tris; i++)
     {
         int point_indexes[3];
         for(unsigned j = 0; j < 3; j++)
@@ -674,7 +674,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         return false;
     }
 
-    for(i = 0; i < header.numframes; i++)
+    for(unsigned i = 0; i < header.numframes; i++)
     {
         unsigned long group;
         if (fread(&group, sizeof(group), 1, file) != 1)
