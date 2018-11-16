@@ -229,11 +229,11 @@ void Model::printInfo(void)
     fprintf(stdout, "--- dump model ---\n");
     fprintf(stdout, "skin_width\t%d\n"
                     "skin_height\t%d\n"
-                    "num_skins\t%d\t%d\n"
-                    "num_points\t%d\t%d\n"
-                    "num_triangles\t%d\t%d\n"
+                    "num_skins\t%d\t%lu\n"
+                    "num_points\t%d\t%lu\n"
+                    "num_triangles\t%d\t%lu\n"
                     "num_vertices\t%d\n"
-                    "num_frames\t%d\t%d\n",
+                    "num_frames\t%d\t%lu\n",
                     skin_width,
                     skin_height,
                     num_skins, skin_width * skin_height * num_skins * sizeof(RGB),
