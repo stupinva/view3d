@@ -28,7 +28,7 @@ unsigned skin_num;
 unsigned num_frames;
 unsigned frame_num;
 
-Model model;
+Model mdl;
 
 void Draw(void)
 {
@@ -117,15 +117,15 @@ void Draw(void)
         glColor3f(1.0f, 1.0f, 1.0f);
     }
 
-    model.drawModel(skin_num, frame_num, draw_skin, lighting);
+    mdl.drawModel(skin_num, frame_num, draw_skin, lighting);
 
     if (draw_normals)
     {
         glDisable(GL_TEXTURE_2D);
         glColor3f(1.0f, 1.0f, 1.0f);
-        model.drawNormals(frame_num);
+        mdl.drawNormals(frame_num);
     }
-    //model.drawModel(0, frame_num);
+    //mdl.drawModel(0, frame_num);
     glFinish();
 }
 
@@ -236,7 +236,7 @@ void AngleLeft(void)
 
 int Init(const char *filename)
 {
-    if (!loadIDPO(&model, filename))
+    if (!loadIDPO(&mdl, filename))
     {
         return -1;
     }
@@ -245,13 +245,13 @@ int Init(const char *filename)
     draw_normals = false;
     lighting = true;
 
-    num_skins = model.getNumSkins();
+    num_skins = mdl.getNumSkins();
     skin_num = 0;
 
-    num_frames = model.getNumFrames();
+    num_frames = mdl.getNumFrames();
     frame_num = 0;
 
-    model.getMinMax(&min, &max);
+    mdl.getMinMax(&min, &max);
     float min_length = Length(min);
     float max_length = Length(max);
     if (max_length > min_length)
