@@ -596,7 +596,6 @@ bool loadIDPO(Model *mdl, const char *file_name)
     free(skin);
 
 //read points    
-    unsigned num_st_verts;
     IDPOPoint *st_verts = (IDPOPoint *)malloc(header.numverts * sizeof(IDPOPoint));
     if (st_verts == NULL)
     {
@@ -612,7 +611,6 @@ bool loadIDPO(Model *mdl, const char *file_name)
         fprintf(stderr, "Could not read st_verts.\n");
         return false;
     }
-    num_st_verts = header.numverts;
 
 //read triangles
     unsigned num_tris;
