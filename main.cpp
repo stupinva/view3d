@@ -35,7 +35,7 @@ unsigned frame_num = 0;
 
 Model model;
 
-static void CALLBACK Draw(void)
+static void Draw(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -128,7 +128,6 @@ static void CALLBACK Draw(void)
     }
     //model.drawModel(0, frame_num);
     glFinish();
-    auxSwapBuffers();
 }
 
 static void SwitchDrawSkin(void)
@@ -244,13 +243,27 @@ static void Init(void)
     glDepthFunc(GL_LEQUAL);
 }
 
-static void CALLBACK Reshape(unsigned width, unsigned height)
+static void Reshape(unsigned width, unsigned height)
 {
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     camera_half_width = (float)width / (float)height * length * zbuffer_min / camera_dist;
     camera_half_height = length*zbuffer_min / camera_dist;
+}
+
+static void CALLBACK CALLBACK_Draw(void)
+{
+    Draw();
+
+    // Меняем видеостраницы местами, чтобы показать на экране изображение
+    // нарисованное в фоновом буфере
+    auxSwapBuffers();
+}
+
+static void CALLBACK CALLBACK_Reshape(unsigned width, unsigned height)
+{
+    Reshape(width, height);
 }
 
 void main(int carg, char **varg)
@@ -328,6 +341,6 @@ void main(int carg, char **varg)
         auxQuit();
     }
     Init();
-    auxReshapeFunc((AUXRESHAPEPROC)Reshape);
-    auxMainLoop(Draw);
+    auxReshapeFunc((AUXRESHAPEPROC)CALLBACK_Reshape);
+    auxMainLoop(CALLBACK_Draw);
 }
