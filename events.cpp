@@ -1,5 +1,5 @@
 #include <math.h>
-#include <gl/gl.h>
+#include <GL/gl.h>
 #include "events.h"
 #include "vmdl.h"
 

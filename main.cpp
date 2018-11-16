@@ -1,33 +1,13 @@
-#include <math.h>
 #include <stdio.h>
-#include <windows.h>
-#include <gl/gl.h>
-#include <gl/glu.h>
-#include <gl/glaux.h>
+#include <SDL2/SDL.h>
+#include <GL/gl.h>
 #include "events.h"
-#include "vmdl.h"
 
-#pragma warning(disable:4244)
-
-static void CALLBACK CALLBACK_Draw(void)
-{
-    Draw();
-
-    // Меняем видеостраницы местами, чтобы показать на экране изображение
-    // нарисованное в фоновом буфере
-    auxSwapBuffers();
-}
-
-static void CALLBACK CALLBACK_Reshape(unsigned width, unsigned height)
-{
-    Reshape(width, height);
-}
-
-void main(int carg, char **varg)
+int main(int carg, char *varg[])
 {
     if (carg != 2)
     {
-        fprintf(stdout, "view3d 1.1 (08-04-2003) by Stupin W.A.\n"
+        fprintf(stderr, "view3d 1.2 (16-11-2018) by Vladimir Stupin\n"
                         "Program for viewing Quake models with using OpenGL.\n"
                         "Usage: view3d <model>\n"
                         "\t<model>\t- name of Quake MDL file.\n"
@@ -49,39 +29,167 @@ void main(int carg, char **varg)
                         "\t\tRight arrow\t- rotate camera right,\n"
                         "\t\tUp arrow\t- rotate camera up,\n"
                         "\t\tDown arrow\t- rotate camera down.\n");
-        return;
+        return 1;
     }
-
-    auxInitPosition(0, 0, 400, 300);
-    auxInitDisplayMode(AUX_RGB | AUX_DOUBLE);
-    if (auxInitWindow("view3d") == GL_FALSE)
-    {
-        auxQuit();
-        return;
-    }
-
     if (Init(varg[1]) != 0)
     {
-        auxQuit();
-        return;
+        fprintf(stderr, "main: failed to load model\n");
+        return 1;
     }
 
-    auxKeyFunc(AUX_q, (AUXKEYPROC)DistUp);
-    auxKeyFunc(AUX_a, (AUXKEYPROC)DistDown);
-    auxKeyFunc(AUX_z, (AUXKEYPROC)PrevFrame);
-    auxKeyFunc(AUX_x, (AUXKEYPROC)NextFrame);
-    auxKeyFunc(AUX_c, (AUXKEYPROC)PrevSkin);
-    auxKeyFunc(AUX_v, (AUXKEYPROC)NextSkin);
-    
-    auxKeyFunc(AUX_l, (AUXKEYPROC)SwitchLighting);
-    auxKeyFunc(AUX_s, (AUXKEYPROC)SwitchDrawSkin);
-    auxKeyFunc(AUX_n, (AUXKEYPROC)SwitchDrawNormals);
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        fprintf(stderr, "main: failed to initialize SDL, %s\n", SDL_GetError());
+        return 1;
+    }
 
-    auxKeyFunc(AUX_UP, (AUXKEYPROC)YawUp);
-    auxKeyFunc(AUX_DOWN, (AUXKEYPROC)YawDown);
-    auxKeyFunc(AUX_LEFT, (AUXKEYPROC)AngleLeft);
-    auxKeyFunc(AUX_RIGHT, (AUXKEYPROC)AngleRight);
+    if (SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8) < 0)
+    {
+        fprintf(stderr, "main: failed to set red size, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    if (SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8) < 0)
+    {
+        fprintf(stderr, "main: failed to set green size, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    if (SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8) < 0)
+    {
+        fprintf(stderr, "main: failed to set blue size, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    if (SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1) < 0)
+    {
+        fprintf(stderr, "main: failed to enable double buffer, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    if (SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16) < 0)
+    {
+        fprintf(stderr, "main: failed to set depth buffer size, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
 
-    auxReshapeFunc((AUXRESHAPEPROC)CALLBACK_Reshape);
-    auxMainLoop(CALLBACK_Draw);
+    SDL_Window *window = SDL_CreateWindow("View3D-SDL", SDL_WINDOWPOS_UNDEFINED,
+                                                        SDL_WINDOWPOS_UNDEFINED,
+                                                        800,
+                                                        600,
+                                                        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    if (window == NULL)
+    {
+        fprintf(stderr, "main: failed to create window, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    SDL_GLContext glcontext = SDL_GL_CreateContext(window);
+    if (glcontext == NULL)
+    {
+        fprintf(stderr, "main: failed to create OpenGL context, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    if (SDL_GL_MakeCurrent(window, glcontext) < 0)
+    {
+        fprintf(stderr, "main: failed to switch OpenGL context, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+
+    int quit = 0;
+    while (quit != 1)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event) != 0)
+        {
+            switch (event.type)
+            {
+                case SDL_QUIT:
+                    quit = 1;
+                    break;
+
+                case SDL_WINDOWEVENT:
+                    switch (event.window.event)
+                    {
+                        case SDL_WINDOWEVENT_RESIZED:
+                        case SDL_WINDOWEVENT_SIZE_CHANGED:
+                            Reshape(event.window.data1, event.window.data2);
+                        break;
+                    }
+                    break;
+
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym)
+                    {
+                        case SDLK_ESCAPE:
+                            quit = 1;
+                            break;
+
+                        case SDLK_q:
+                            DistUp();
+                            break;
+
+                        case SDLK_a:
+                            DistDown();
+                            break;
+
+                        case SDLK_z:
+                            PrevFrame();
+                            break;
+
+                        case SDLK_x:
+                            NextFrame();
+                            break;
+
+                        case SDLK_c:
+                            PrevSkin();
+                            break;
+
+                        case SDLK_v:
+                            NextSkin();
+                            break;
+
+                        case SDLK_l:
+                            SwitchLighting();
+                            break;
+
+                        case SDLK_s:
+                            SwitchDrawSkin();
+                            break;
+
+                        case SDLK_n:
+                            SwitchDrawNormals();
+                            break;
+
+                        case SDLK_UP:
+                            YawUp();
+                            break;
+
+                        case SDLK_DOWN:
+                            YawDown();
+                            break;
+
+                        case SDLK_LEFT:
+                            AngleLeft();
+                            break;
+
+                        case SDLK_RIGHT:
+                            AngleRight();
+                            break;
+                    }
+                    break;
+            } 
+        }
+
+        Draw();
+
+        /* Меняем буферы местами */
+        SDL_GL_SwapWindow(window);
+    }
+
+    SDL_Quit();
+    return 0;
 }

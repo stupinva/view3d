@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gl/gl.h>
+#include <GL/gl.h>
 #include "vmdl.h"
 
 Vector3D CrossProduct(Vector3D v0, Vector3D v1)
