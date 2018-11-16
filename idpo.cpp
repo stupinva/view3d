@@ -1,84 +1,85 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include "vmdl.h"
 
-const long IDPO_IDENT = 0x4F504449;
+const uint32_t IDPO_IDENT = 0x4F504449;
 #pragma pack(push, 1)
 struct IDPOHeader
 {
-    unsigned long id;      // 0x4F504449 = "IDPO" for IDPOLYGON
-    unsigned long version; // Version = 3, 6
+    uint32_t id;      // 0x4F504449 = "IDPO" for IDPOLYGON
+    uint32_t version; // Version = 3, 6
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct IDPO3InfoHeader
 {
-    Vector3D scale;           // Model scale factors.
-    Vector3D origin;          // Model origin.
-    float radius;             // Model bounding radius.
-    Vector3D offsets;         // Eye position (useless?)
-    unsigned long numskins ;  // the number of skin textures
-    unsigned long skinwidth;  // Width of skin texture
-                              //           must be multiple of 8
-    unsigned long skinheight; // Height of skin texture
-                              //           must be multiple of 8
-    unsigned long numverts;   // Number of vertices
-    unsigned long numtris;    // Number of triangles surfaces
-    unsigned long numframes;  // Number of frames
-    unsigned long synctype;   // 0 = synchron, 1 = random
+    Vector3D scale;      // Model scale factors.
+    Vector3D origin;     // Model origin.
+    float radius;        // Model bounding radius.
+    Vector3D offsets;    // Eye position (useless?)
+    uint32_t numskins;   // the number of skin textures
+    uint32_t skinwidth;  // Width of skin texture
+                         //           must be multiple of 8
+    uint32_t skinheight; // Height of skin texture
+                         //           must be multiple of 8
+    uint32_t numverts;   // Number of vertices
+    uint32_t numtris;    // Number of triangles surfaces
+    uint32_t numframes;  // Number of frames
+    uint32_t synctype;   // 0 = synchron, 1 = random
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct IDPO6InfoHeader
 {
-    Vector3D scale;           // Model scale factors.
-    Vector3D origin;          // Model origin.
-    float radius;             // Model bounding radius.
-    Vector3D offsets;         // Eye position (useless?)
-    unsigned long numskins ;  // the number of skin textures
-    unsigned long skinwidth;  // Width of skin texture
-                              //     must be multiple of 8
-    unsigned long skinheight; // Height of skin texture
-                              //     must be multiple of 8
-    unsigned long numverts;   // Number of vertices
-    unsigned long numtris;    // Number of triangles surfaces
-    unsigned long numframes;  // Number of frames
-    unsigned long synctype;   // 0 = synchron, 1 = random
-    unsigned long flags;      // 0 (see Alias models)
-    float size;               // average size of triangles
+    Vector3D scale;      // Model scale factors.
+    Vector3D origin;     // Model origin.
+    float radius;        // Model bounding radius.
+    Vector3D offsets;    // Eye position (useless?)
+    uint32_t numskins ;  // the number of skin textures
+    uint32_t skinwidth;  // Width of skin texture
+                         //     must be multiple of 8
+    uint32_t skinheight; // Height of skin texture
+                         //     must be multiple of 8
+    uint32_t numverts;   // Number of vertices
+    uint32_t numtris;    // Number of triangles surfaces
+    uint32_t numframes;  // Number of frames
+    uint32_t synctype;   // 0 = synchron, 1 = random
+    uint32_t flags;      // 0 (see Alias models)
+    float size;          // average size of triangles
 };
 #pragma pack(pop)
 
-const IDPO3_ON_SEAM = 0x01;
-const IDPO6_ON_SEAM = 0x20;
+const uint32_t IDPO3_ON_SEAM = 0x01;
+const uint32_t IDPO6_ON_SEAM = 0x20;
 #pragma pack(push, 1)
 struct IDPOPoint
 {
-    unsigned long onseam; // 0 or 0x20
-    unsigned long s;      // position, horizontally
-                          //     in range [0, skinwidth)
-    unsigned long t;      // position, vertically
-                          //     in range [0, skinheight)
+    uint32_t onseam; // 0 or 0x20
+    uint32_t s;      // position, horizontally
+                     //     in range [0, skinwidth)
+    uint32_t t;      // position, vertically
+                     //     in range [0, skinheight)
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct IDPOTriangle
 {
-    unsigned long facesfront;  // boolean
-    unsigned long vertices[3]; // Index of 3 triangle vertices
-                               //     in range [0, numverts)
+    uint32_t facesfront;  // boolean
+    uint32_t vertices[3]; // Index of 3 triangle vertices
+                          //     in range [0, numverts)
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct IDPOVertex
 {
-    unsigned char packedposition[3]; // X, Y, Z coordinate, packed on 0-255
-    unsigned char lightnormalindex;  // index of the vertex normal
+    uint8_t packedposition[3]; // X, Y, Z coordinate, packed on 0-255
+    uint8_t lightnormalindex;  // index of the vertex normal
 };
 #pragma pack(pop)
 
@@ -487,7 +488,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
     memset(skin, 0, header.skinwidth * header.skinheight * sizeof(RGB));
     for(unsigned i = 0; i < header.numskins; i++)
     {
-        unsigned long group;
+        uint32_t group;
         if (fread(&group, sizeof(group), 1, file) != 1)
         {
             free(skin);
@@ -553,7 +554,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
     memset(skin, 0, width * height * sizeof(RGB));
     for(unsigned i = 0; i < header.numskins; i++)
     {
-        unsigned long group;
+        uint32_t group;
         if (fread(&group, sizeof(group), 1, file) != 1)
         {
             free(skin);
@@ -588,7 +589,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         {
             free(skin);
             fclose(file);
-            fprintf(stderr, "Unknown group identifier %d.\n", group);
+            fprintf(stderr, "Unknown group identifier %lu.\n", (unsigned long)group);
             return false;
         }
     }
@@ -692,7 +693,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
 
     for(unsigned i = 0; i < header.numframes; i++)
     {
-        unsigned long group;
+        uint32_t group;
         if (fread(&group, sizeof(group), 1, file) != 1)
         {
             free(frame_normals);
@@ -729,7 +730,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
             free(frame_normals);
             free(frame_vertices);
             fclose(file);
-            fprintf(stderr, "Unknown group identifier %d.\n", group);
+            fprintf(stderr, "Unknown group identifier %lu.\n", (unsigned long)group);
             return false;
         }
     }
