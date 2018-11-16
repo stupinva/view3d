@@ -6,33 +6,37 @@
 const float ZBUFFER_MIN = 10.0f;
 const float M_PI = 3.14159265f;
 
-float zbuffer_min = ZBUFFER_MIN;
-float zbuffer_max = 2.0f * ZBUFFER_MIN;
+float zbuffer_min;
+float zbuffer_max;
 
-float camera_half_width = 4.0f;
-float camera_half_height = 4.0f;
-float camera_yaw = 0.0f;
-float camera_angle = 0.0f;
-float camera_dist = (zbuffer_max - zbuffer_min) / 2.0f;
+float camera_half_width;
+float camera_half_height;
+float camera_yaw;
+float camera_angle;
+float camera_dist;
 float length;
 Vector3D min;
 Vector3D max;
 
-bool draw_skin = true;
-bool draw_normals = false;
-bool lighting = true;
+bool draw_skin;
+bool draw_normals;
+bool lighting;
 
-unsigned num_skins = 0;
-unsigned skin_num = 0;
+unsigned num_skins;
+unsigned skin_num;
 
-unsigned num_frames = 0;
-unsigned frame_num = 0;
+unsigned num_frames;
+unsigned frame_num;
 
 Model model;
 
 void Draw(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glClearDepth(zbuffer_min);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -230,12 +234,47 @@ void AngleLeft(void)
     }
 }
 
-void Init(void)
+int Init(const char *filename)
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearDepth(zbuffer_min);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
+    if (!loadIDPO(&model, filename))
+    {
+        return -1;
+    }
+
+    draw_skin = true;
+    draw_normals = false;
+    lighting = true;
+
+    num_skins = model.getNumSkins();
+    skin_num = 0;
+
+    num_frames = model.getNumFrames();
+    frame_num = 0;
+
+    model.getMinMax(&min, &max);
+    float min_length = Length(min);
+    float max_length = Length(max);
+    if (max_length > min_length)
+    {
+        length = max_length;
+    }
+    else
+    {
+        length = min_length;
+    }
+
+    camera_half_width = 4.0f;
+    camera_half_height = 4.0f;
+    camera_yaw = 0.0f;
+    camera_angle = 0.0f;
+    //camera_dist = (zbuffer_max - zbuffer_min) / 2.0f;
+    camera_dist = length + zbuffer_min;
+
+    zbuffer_min = ZBUFFER_MIN;
+    //zbuffer_max = 2.0f * ZBUFFER_MIN;
+    zbuffer_max = length * 2 + zbuffer_min;
+
+    return 0;
 }
 
 void Reshape(unsigned width, unsigned height)

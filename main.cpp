@@ -52,28 +52,19 @@ void main(int carg, char **varg)
         return;
     }
 
-    if (!loadIDPO(&model, varg[1]))
+    auxInitPosition(0, 0, 400, 300);
+    auxInitDisplayMode(AUX_RGB | AUX_DOUBLE);
+    if (auxInitWindow("view3d") == GL_FALSE)
     {
+        auxQuit();
         return;
     }
 
-    num_skins = model.getNumSkins();
-    num_frames = model.getNumFrames();
-
-    model.getMinMax(&min, &max);
-    float min_length = Length(min);
-    float max_length = Length(max);
-    if (max_length > min_length)
+    if (Init(varg[1]) != 0)
     {
-        length = max_length;
+        auxQuit();
+        return;
     }
-    else
-    {
-        length = min_length;
-    }
-
-    camera_dist = length + zbuffer_min;
-    zbuffer_max = length * 2 + zbuffer_min;
 
     auxKeyFunc(AUX_q, (AUXKEYPROC)DistUp);
     auxKeyFunc(AUX_a, (AUXKEYPROC)DistDown);
@@ -91,13 +82,6 @@ void main(int carg, char **varg)
     auxKeyFunc(AUX_LEFT, (AUXKEYPROC)AngleLeft);
     auxKeyFunc(AUX_RIGHT, (AUXKEYPROC)AngleRight);
 
-    auxInitPosition(0, 0, 400, 300);
-    auxInitDisplayMode(AUX_RGB | AUX_DOUBLE);
-    if (auxInitWindow("view3d") == GL_FALSE)
-    {
-        auxQuit();
-    }
-    Init();
     auxReshapeFunc((AUXRESHAPEPROC)CALLBACK_Reshape);
     auxMainLoop(CALLBACK_Draw);
 }
