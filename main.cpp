@@ -236,28 +236,8 @@ static void AngleLeft(void)
     }
 }
 
-void InitKeyboard(void)
-{
-    auxKeyFunc(AUX_q, (AUXKEYPROC)DistUp);
-    auxKeyFunc(AUX_a, (AUXKEYPROC)DistDown);
-    auxKeyFunc(AUX_z, (AUXKEYPROC)PrevFrame);
-    auxKeyFunc(AUX_x, (AUXKEYPROC)NextFrame);
-    auxKeyFunc(AUX_c, (AUXKEYPROC)PrevSkin);
-    auxKeyFunc(AUX_v, (AUXKEYPROC)NextSkin);
-    
-    auxKeyFunc(AUX_l, (AUXKEYPROC)SwitchLighting);
-    auxKeyFunc(AUX_s, (AUXKEYPROC)SwitchDrawSkin);
-    auxKeyFunc(AUX_n, (AUXKEYPROC)SwitchDrawNormals);
-
-    auxKeyFunc(AUX_UP, (AUXKEYPROC)YawUp);
-    auxKeyFunc(AUX_DOWN, (AUXKEYPROC)YawDown);
-    auxKeyFunc(AUX_LEFT, (AUXKEYPROC)AngleLeft);
-    auxKeyFunc(AUX_RIGHT, (AUXKEYPROC)AngleRight);
-}
-
 static void Init(void)
 {
-    InitKeyboard();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearDepth(zbuffer_min);
     glEnable(GL_DEPTH_TEST);
@@ -324,6 +304,22 @@ void main(int carg, char **varg)
 
     camera_dist = length + zbuffer_min;
     zbuffer_max = length * 2 + zbuffer_min;
+
+    auxKeyFunc(AUX_q, (AUXKEYPROC)DistUp);
+    auxKeyFunc(AUX_a, (AUXKEYPROC)DistDown);
+    auxKeyFunc(AUX_z, (AUXKEYPROC)PrevFrame);
+    auxKeyFunc(AUX_x, (AUXKEYPROC)NextFrame);
+    auxKeyFunc(AUX_c, (AUXKEYPROC)PrevSkin);
+    auxKeyFunc(AUX_v, (AUXKEYPROC)NextSkin);
+    
+    auxKeyFunc(AUX_l, (AUXKEYPROC)SwitchLighting);
+    auxKeyFunc(AUX_s, (AUXKEYPROC)SwitchDrawSkin);
+    auxKeyFunc(AUX_n, (AUXKEYPROC)SwitchDrawNormals);
+
+    auxKeyFunc(AUX_UP, (AUXKEYPROC)YawUp);
+    auxKeyFunc(AUX_DOWN, (AUXKEYPROC)YawDown);
+    auxKeyFunc(AUX_LEFT, (AUXKEYPROC)AngleLeft);
+    auxKeyFunc(AUX_RIGHT, (AUXKEYPROC)AngleRight);
 
     auxInitPosition(0, 0, 400, 300);
     auxInitDisplayMode(AUX_RGB | AUX_DOUBLE);
