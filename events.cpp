@@ -34,12 +34,15 @@ Model mdl;
 
 void Draw(void)
 {
+    // Очищаем буферы цвета (буфер изображения) и глубины (z-буфер)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Настраиваем буфер глубины (z-буфер)
     glClearDepth(zbuffer_min);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     
+    // Настраиваем матрицу проекции
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     
@@ -49,7 +52,12 @@ void Draw(void)
     glRotatef(camera_yaw, 1.0f, 0.0f, 0.0f);
     glRotatef(90.0f - camera_angle, 0.0f, 1.0f, 0.0f);
     
+    // Настраиваем матрицу отрисовки моделей
     glMatrixMode(GL_MODELVIEW);
+    // Меняем систему координат с glLoadIdentity():
+    // ось x направлена вправо, ось y направлена вверх, ось z направлена вглубь экрана
+    // на систему координат модели:
+    // ось x направлена влево, y направлена вглубь, z направлена вверх (?)
     //glLoadIdentity();
     const float xyz[] =
     {
@@ -61,6 +69,8 @@ void Draw(void)
     glLoadMatrixf(xyz);
     
     glPolygonMode(GL_FRONT, GL_FILL);
+
+    // Если нужно освещение, настраиваем и включаем его
     if (lighting)
     {
         glEnable(GL_LIGHTING);
@@ -89,11 +99,13 @@ void Draw(void)
         glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse1);
         glEnable(GL_LIGHT1);
     }
+    // Если освещение не нужно, выключаем его
     else
     {
         glDisable(GL_LIGHTING);
     }
 
+    // Если нужно текстурировать модель, настраиваем параметры текстурирования
     if (draw_skin)
     {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -104,30 +116,38 @@ void Draw(void)
         glEnable(GL_TEXTURE_2D);
         glShadeModel(GL_SMOOTH);
         
+        // Если нужно освещение, то текстура меняет яркость
+        // в зависимости от степени освещённости
         if (lighting)
         {
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         }
+        // Если освещение не нужно, то цвет текстуры не зависит от освещения
         else
         {
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
         }
     }
+    // Если текстурировать не нужно, то отключаем текстурирование и
+    // включаем заливку треугольников белым цветом
     else
     {
         glDisable(GL_TEXTURE_2D);
         glColor3f(1.0f, 1.0f, 1.0f);
     }
 
+    // Рисуем модель
     mdl.drawModel(skin_num, frame_num, draw_skin, lighting);
 
+    // Если нужно показать нормали, то рисуем их белым цветом
     if (draw_normals)
     {
         glDisable(GL_TEXTURE_2D);
         glColor3f(1.0f, 1.0f, 1.0f);
         mdl.drawNormals(frame_num);
     }
-    //mdl.drawModel(0, frame_num);
+
+    // Ждём выполнения всех отправленных команд OpenGL
     glFinish();
 }
 
