@@ -265,16 +265,16 @@ int Init(const char *filename)
         length = min_length;
     }
 
+    zbuffer_min = ZBUFFER_MIN;
+    //zbuffer_max = 2.0f * ZBUFFER_MIN;
+    zbuffer_max = length * 2 + zbuffer_min;
+
     camera_half_width = 4.0f;
     camera_half_height = 4.0f;
     camera_yaw = 0.0f;
     camera_angle = 0.0f;
     //camera_dist = (zbuffer_max - zbuffer_min) / 2.0f;
     camera_dist = length + zbuffer_min;
-
-    zbuffer_min = ZBUFFER_MIN;
-    //zbuffer_max = 2.0f * ZBUFFER_MIN;
-    zbuffer_max = length * 2 + zbuffer_min;
 
     return 0;
 }
