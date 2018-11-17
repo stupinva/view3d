@@ -8,48 +8,50 @@ const uint32_t IDPO_IDENT = 0x4F504449;
 #pragma pack(push, 1)
 struct IDPOHeader
 {
-    uint32_t id;      // 0x4F504449 = "IDPO" for IDPOLYGON
-    uint32_t version; // Version = 3, 6
+    uint32_t id;      // Идентификатор формата
+    uint32_t version; // Версия формата (поддерживаются 3 и 6)
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct IDPO3InfoHeader
 {
-    Vector3D scale;      // Model scale factors.
-    Vector3D origin;     // Model origin.
-    float radius;        // Model bounding radius.
-    Vector3D offsets;    // Eye position (useless?)
-    uint32_t numskins;   // the number of skin textures
-    uint32_t skinwidth;  // Width of skin texture
-                         //           must be multiple of 8
-    uint32_t skinheight; // Height of skin texture
-                         //           must be multiple of 8
-    uint32_t numverts;   // Number of vertices
-    uint32_t numtris;    // Number of triangles surfaces
-    uint32_t numframes;  // Number of frames
-    uint32_t synctype;   // 0 = synchron, 1 = random
+    Vector3D scale;      // Коэффициенты масштабирования по осям
+    Vector3D origin;     // Начало координат модели
+    float radius;        // Ограничивающий радиус модели
+    Vector3D offsets;    // Положение глаз (не используется?)
+    uint32_t numskins;   // Количество текстур в модели
+    uint32_t skinwidth;  // Ширина каждой текстуры
+                         //     (должна быть кратна 8)
+    uint32_t skinheight; // Высота каждой текстуры
+                         //     (должна быть кратна 8)
+    uint32_t numverts;   // Количество вершин
+    uint32_t numtris;    // Количество треугольников
+    uint32_t numframes;  // Количество кадров
+    uint32_t synctype;   // Тип синхронизации (?)
+                         //     0 = синхронная, 1 = случайная
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct IDPO6InfoHeader
 {
-    Vector3D scale;      // Model scale factors.
-    Vector3D origin;     // Model origin.
-    float radius;        // Model bounding radius.
-    Vector3D offsets;    // Eye position (useless?)
-    uint32_t numskins ;  // the number of skin textures
-    uint32_t skinwidth;  // Width of skin texture
-                         //     must be multiple of 8
-    uint32_t skinheight; // Height of skin texture
-                         //     must be multiple of 8
-    uint32_t numverts;   // Number of vertices
-    uint32_t numtris;    // Number of triangles surfaces
-    uint32_t numframes;  // Number of frames
-    uint32_t synctype;   // 0 = synchron, 1 = random
-    uint32_t flags;      // 0 (see Alias models)
-    float size;          // average size of triangles
+    Vector3D scale;      // Коэффициенты масштабирования по осям
+    Vector3D origin;     // Начало координат модели
+    float radius;        // Ограничивающий радиус модели
+    Vector3D offsets;    // Положение глаз (не используется?)
+    uint32_t numskins;   // Количество текстур в модели
+    uint32_t skinwidth;  // Ширина каждой текстуры
+                         //     (должна быть кратна 8)
+    uint32_t skinheight; // Высота каждой текстуры
+                         //     (должна быть кратна 8)
+    uint32_t numverts;   // Количество вершин
+    uint32_t numtris;    // Количество треугольников
+    uint32_t numframes;  // Количество кадров
+    uint32_t synctype;   // Тип синхронизации (?)
+                         //     0 = синхронная, 1 = случайная
+    uint32_t flags;      // Флаги модели
+    float size;          // Средний размер треугольников (?)
 };
 #pragma pack(pop)
 
@@ -58,36 +60,39 @@ const uint32_t IDPO6_ON_SEAM = 0x20;
 #pragma pack(push, 1)
 struct IDPOPoint
 {
-    uint32_t onseam; // 0 or 0x20
-    uint32_t s;      // position, horizontally
-                     //     in range [0, skinwidth)
-    uint32_t t;      // position, vertically
-                     //     in range [0, skinheight)
+    uint32_t onseam; // Точка на шве? 0 - нет,
+                     //     0x01 - да (версия 3), 0x20 - да (версия 6)
+    uint32_t s;      // Координата по горизонтали
+                     //     в интервале [0, skinwidth)
+    uint32_t t;      // Координата по вертикали
+                     //     в интервале [0, skinheight)
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct IDPOTriangle
 {
-    uint32_t facesfront;  // boolean
-    uint32_t vertices[3]; // Index of 3 triangle vertices
-                          //     in range [0, numverts)
+    uint32_t facesfront;  // Треугольник спереди модели? 0 - нет
+    uint32_t vertices[3]; // Индексы трёх вершин треугольника
+                          //     в интервале [0, numverts)
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct IDPOVertex
 {
-    uint8_t packedposition[3]; // X, Y, Z coordinate, packed on 0-255
-    uint8_t lightnormalindex;  // index of the vertex normal
+    uint8_t packedposition[3]; // Координаты X, Y, Z масштабированные
+                               //     в интервал [0, 255]
+    uint8_t lightnormalindex;  // Индекс нормали вершины
+                               //     (для расчёта освещения по Фонгу)
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 struct IDPO3FrameHeader
 {
-    IDPOVertex min; // minimum values of X, Y, Z
-    IDPOVertex max; // maximum values of X, Y, Z
+    IDPOVertex min; // Минимальные значения координат X, Y, Z
+    IDPOVertex max; // Максимальные значения координат X, Y, Z
 };
 #pragma pack(pop)
 
@@ -95,9 +100,9 @@ const unsigned IDPO_MAX_FRAME_NAME = 16;
 #pragma pack(push, 1)
 struct IDPO6FrameHeader
 {
-    IDPOVertex min;                 // minimum values of X, Y, Z
-    IDPOVertex max;                 // maximum values of X, Y, Z
-    char name[IDPO_MAX_FRAME_NAME]; // name of frame
+    IDPOVertex min;                 // Минимальные значения координат X, Y, Z
+    IDPOVertex max;                 // Максимальные значения координат X, Y, Z
+    char name[IDPO_MAX_FRAME_NAME]; // Название кадра
 };
 #pragma pack(pop)
 
@@ -230,40 +235,9 @@ IDPOHeader hdr;
 IDPO6InfoHeader header;
 Model *model;
 
-//loading simple and group skins
+// Загрузка простых и групповых текстур
+
 RGB *skin;
-
-/*
-bool loadIDPOSkin(void)
-{
-    for(unsigned y = 0; y < header.skinheight; y++)
-    {
-        for(unsigned x = 0; x < header.skinwidth; x++)
-        {
-            int index = fgetc(file);
-            if (index != EOF)
-            {
-                skin[y * header.skinwidth + x] = quake_palette[index];
-            }
-            else
-            {
-                free(skin);
-                fclose(file);
-                fprintf(stderr, "Could not read skin.\n");
-                return false;
-            }
-        }
-    }
-
-    if (!model->addSkin(header.skinwidth, header.skinheight, skin))
-    {
-        free(skin);
-        fclose(file);
-        return false;
-    }
-    return true;
-}
-*/
 
 bool loadIDPOSkin(unsigned width, unsigned height)
 {
@@ -322,9 +296,10 @@ bool loadIDPOGroupSkinHeader(void)
     return true;
 }
 
-//loading simple and group frames
+// Загрузка простых и групповых кадров
 Vector3D *frame_vertices;
 Vector3D *frame_normals;
+
 bool loadIDPOFrame(void)
 {
     unsigned frame_header_size = sizeof(IDPO6FrameHeader);
@@ -431,7 +406,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
 {
     model = mdl;
 
-//open file
+    // Открываем файл
     file = fopen(file_name, "rb");
     if (file == NULL)
     {
@@ -439,7 +414,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         return false;
     }
 
-//read and chek header
+    // Считываем и проверяем заголовок
     if (fread(&hdr, sizeof(hdr), 1, file) != 1)
     {
         fclose(file);
@@ -475,63 +450,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         return false;
     }
 
-//read skins
-/*
-    skin = (RGB *)malloc(header.skinwidth * header.skinheight * sizeof(RGB));
-    if (skin == NULL)
-    {
-        fclose(file);
-        fprintf(stderr, "Could not get memory for skin.\n");
-        return false;
-    }
-
-    memset(skin, 0, header.skinwidth * header.skinheight * sizeof(RGB));
-    for(unsigned i = 0; i < header.numskins; i++)
-    {
-        uint32_t group;
-        if (fread(&group, sizeof(group), 1, file) != 1)
-        {
-            free(skin);
-            fclose(file);
-            fprintf(stderr, "Could not read group field.\n");
-            return false;
-        }
-
-        //fprintf(stdout, "group\t%d\n", group);
-        if (group == 0)
-        {
-            if (!loadIDPOSkin())
-            {
-                return false;
-            }
-        }
-        else if (group == 1)
-        {
-            if (!loadIDPOGroupHeader())
-            {
-                free(skin);
-                fclose(file);
-                return false;
-            }
-            for(unsigned j = 0; j < nb; j++)
-            {
-                if (!loadIDPOSkin())
-                {
-                    return false;
-                }
-            }
-        }
-        else
-        {
-            free(skin);
-            fclose(file);
-            fprintf(stderr, "Unknown group identifier %d.\n", group);
-            return false;
-        }
-    }
-    free(skin);
-*/
-
+    // Считываем текстуры
     unsigned width = 1;
     unsigned height = 1;
     while (width < header.skinwidth)
@@ -595,7 +514,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
     }
     free(skin);
 
-//read points    
+    // Считываем координаты точек на текстурах
     IDPOPoint *st_verts = (IDPOPoint *)malloc(header.numverts * sizeof(IDPOPoint));
     if (st_verts == NULL)
     {
@@ -612,7 +531,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
         return false;
     }
 
-//read triangles
+    // Считываем треугольники
     unsigned num_tris;
     IDPOTriangle *tris = (IDPOTriangle *)malloc(header.numtris * sizeof(IDPOTriangle));
     if (tris == NULL)
@@ -633,9 +552,8 @@ bool loadIDPO(Model *mdl, const char *file_name)
     }
     num_tris = header.numtris;
 
-//convert st_verts to points and tris to triangles
-    //float f_width = (float)header.skinwidth;
-    //float f_height = (float)header.skinheight;
+    // Считаем реальные координаты точек на текстурах
+    // и подменяем индексы координат этих точек в треугольниках
     float f_width = (float)width;
     float f_height = (float)height;
     unsigned onseam = IDPO6_ON_SEAM;
@@ -671,7 +589,7 @@ bool loadIDPO(Model *mdl, const char *file_name)
     free(st_verts);
     free(tris);
 
-//read frames
+    // Считываем кадры
     frame_vertices = (Vector3D *)malloc(header.numverts * sizeof(Vector3D));
     if (frame_vertices == NULL)
     {
@@ -736,22 +654,21 @@ bool loadIDPO(Model *mdl, const char *file_name)
     free(frame_vertices);
     fclose(file);
 
-//and last...
-//calculate normals and bound boxes
+    // Напоследок пересчитываем нормали вершин и предельные значения координат вершин
     if (!model->calculateNormals())
     {
         return false;
     }
     model->calculateBoundBoxes();
 
-//verify model
+    // Проверяем модель
     if (!model->verifyModel())
     {
         fprintf(stderr, "Warning: Model has wrong indexes.\n");
         return false;
     }
 
-//dump loaded model
+    // Вывод данных загруженной модели
     //model->printInfo();
     return true;
 }

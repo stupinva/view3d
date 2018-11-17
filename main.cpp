@@ -186,7 +186,7 @@ int main(int carg, char *varg[])
 
         Draw();
 
-        /* Меняем буферы местами */
+        // Меняем буферы местами
         SDL_GL_SwapWindow(window);
     }
 
