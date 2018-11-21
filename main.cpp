@@ -62,8 +62,8 @@ static void CALLBACK Draw(void)
 		glLightf(GL_LIGHT0,GL_SPOT_EXPONENT,0.0f);
 		glLightfv(GL_LIGHT0,GL_SPOT_DIRECTION,direction0);
 		glLightfv(GL_LIGHT0,GL_POSITION,position0);
-		glLightfv(GL_LIGHT1,GL_SPECULAR,specular0);
-		glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuse0);
+		glLightfv(GL_LIGHT0,GL_SPECULAR,specular0);
+		glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuse0);
 		glLightfv(GL_LIGHT0,GL_AMBIENT,ambient0);
 		glEnable(GL_LIGHT0);
 
