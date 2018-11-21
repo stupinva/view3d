@@ -44,7 +44,7 @@ bool Texture::ConvertTexture(void)
 		src_palette=(RGB *)data;
 		src_pixels=(unsigned char *)data+256*sizeof(RGB);
 	}
-	else if (type=TEXTURE_RGB)
+	else if (type==TEXTURE_RGB)
 		return true;
 	else
 		return false;
