@@ -1,6 +1,4 @@
-#include <windows.h>
-#include <gl\gl.h>
-
+#include <GL/gl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "misc.h"

@@ -1,5 +1,4 @@
-#include <windows.h>
-#include <gl\gl.h>
+#include <GL/gl.h>
 #include "model.h"
 
 void Model::DrawModel(unsigned lighting,unsigned frame)
