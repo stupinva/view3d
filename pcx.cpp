@@ -38,7 +38,7 @@ struct PCXHeader
 #pragma pack(pop)
 
 //Перечисляются все возможные сочетания полей bits_per_plane и num_planes
-const PCX_NUM_TYPES	=6;
+const int PCX_NUM_TYPES	=6;
 const unsigned char pcx_bits_per_plane[PCX_NUM_TYPES]	={1,2,1,1,8,8};
 const unsigned char pcx_num_planes[PCX_NUM_TYPES]		={1,1,3,4,1,3};
 
