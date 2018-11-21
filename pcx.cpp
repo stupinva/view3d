@@ -182,10 +182,20 @@ bool Texture::LoadPCXTexture(const char *file_name)
 				if ((byte==0x0C)||(byte==0x0A))
 				for(j=0;j<256;j++)
 				{
-					if ((((RGB *)data)[j].red=fgetc(file))!=EOF)
-						if ((((RGB *)data)[j].green=fgetc(file))!=EOF)
-							if ((((RGB *)data)[j].blue=fgetc(file))!=EOF)
+					int red, green, blue;   
+					if ((red=fgetc(file))!=EOF)
+					{
+						((RGB *)data)[j].red = (unsigned char)red;
+						if ((green=fgetc(file))!=EOF)
+						{
+							((RGB *)data)[j].green = (unsigned char)green;
+							if ((blue=fgetc(file))!=EOF)
+							{
+								((RGB *)data)[j].blue = (unsigned char)blue;
 								continue;
+							}
+						}
+					}
 					free(data);
 					fclose(file);
 					fprintf(stderr,"Unexpected end of PCX-file.\n");
