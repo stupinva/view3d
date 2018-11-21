@@ -167,7 +167,7 @@ bool Model::CalculateNormals(void)
 			frame_vertex_normals[j][2]=0.0f;
 			vertex_normal_denominators[j]=0;
 		}
-		for(j=0;j<num_triangles;j++)
+		for(unsigned j=0;j<num_triangles;j++)
 		{
 			unsigned vertex_indexes[3];
 			for(unsigned k=0;k<3;k++)
@@ -192,7 +192,7 @@ bool Model::CalculateNormals(void)
 			VectorNormalize(triangle_normal,triangle_normal);
 			VectorCopy(triangle_normal,frame_triangle_normals[j]);
 			//Добавляем к нормалям вершин, принадлежащих текущему треугольнику его нормаль.
-			for(k=0;k<3;k++)
+			for(unsigned k=0;k<3;k++)
 			{
 				VectorAdd
 				(
@@ -204,7 +204,7 @@ bool Model::CalculateNormals(void)
 			}
 		}
 		//Вычисляем норамли к вершинам текущего кадра.
-		for(j=0;j<num_vertices;j++)
+		for(unsigned j=0;j<num_vertices;j++)
 			VectorScale
 			(
 				frame_vertex_normals[j],

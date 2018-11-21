@@ -118,7 +118,7 @@ bool Model::LoadIDP2Model(const char *file_name)
 	fseek(file,header.ofs_points,SEEK_SET);
 	float scale_width=1.0f/(float)header.skin_width;
 	float scale_height=1.0f/(float)header.skin_height;
-	for(i=0;i<header.num_points;i++)
+	for(unsigned i=0;i<header.num_points;i++)
 	{
 		//fprintf(stdout,"%d points loaded.\r",i);
 		IDP2Point point;
@@ -139,7 +139,7 @@ bool Model::LoadIDP2Model(const char *file_name)
 	meshes[0].num_skins=num_skins;
 
 	fseek(file,header.ofs_triangles,SEEK_SET);
-	for(i=0;i<header.num_triangles;i++)
+	for(unsigned i=0;i<header.num_triangles;i++)
 	{
 		//fprintf(stdout,"%d triangles loaded.\r",i);
 		IDP2Triangle triangle;
@@ -160,7 +160,7 @@ bool Model::LoadIDP2Model(const char *file_name)
 	fprintf(stdout,"%d triangles loaded.\n",num_triangles);
 	//Грузим кадры.
 	fseek(file,header.ofs_frames,SEEK_SET);
-	for(i=0;i<header.num_frames;i++)
+	for(unsigned i=0;i<header.num_frames;i++)
 	{
 		fprintf(stderr,"%d frames loaded.   \r",i);
 		IDP2FrameHeader frame_header;
