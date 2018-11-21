@@ -1,10 +1,10 @@
 #ifndef __MODEL__
 #define __MODEL__
 #include "texture.h"
-////////////////////////////////////////////////
-//04-07-2003                                  //
-//Структуры модели, формат и кое-какие методы.//
-////////////////////////////////////////////////
+/////////////////////////////////////////////////
+// 04-07-2003                                  //
+// Структуры модели, формат и кое-какие методы //
+/////////////////////////////////////////////////
 typedef float Vector2D[2];
 typedef float Vector3D[3];
 
@@ -66,7 +66,7 @@ public:
     bool LoadIDP2Model(const char *file_name);
     bool CalculateNormals(void);
     float GetBoundRadius(void);
-    //Освещение: 0 - нет, 1 - Ламберта, 2 - Гуро, (3 - Фонга).
+    // Освещение: 0 - нет, 1 - Ламберта, 2 - Гуро, (3 - Фонга)
     void DrawModel(unsigned lighting,unsigned frame);
     unsigned GetNumFrames(void);
     void DumpModel(void);
@@ -80,6 +80,6 @@ void VectorScale(Vector3D a,float f,Vector3D ans);
 float VectorLength(Vector3D v);
 void VectorNormalize(Vector3D a,Vector3D ans);
 
-//Кэш текстур, здесь хранятся все текстуры для всех загруженных моделей.
+// Кэш текстур, здесь хранятся все текстуры для всех загруженных моделей
 //extern Textures textures_cashe;
 #endif

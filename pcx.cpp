@@ -3,46 +3,46 @@
 #include <string.h>
 #include "texture.h"
 
-//Заголовок PCX-файлов
+// Заголовок PCX-файлов
 #pragma pack(push,1)
 struct PCXHeader
 {
-    unsigned char manufacturer;        // - изготовитель
-                                        //всегда 10
-    unsigned char version;            //- версия
-                                        //0 - 2.5 без палитры (монохромная)
-                                        //2 - 2.8 с палитрой (4-битная)
-                                        //3    - 2.8/3.0 без палитры (8-битная)
-                                        //4 - нет палитры?
-                                        //5 - 3.0 с палитрой.
-    unsigned char encoding;            // - тип кодирования
-                                        //всегда 1
-    unsigned char bits_per_plane;    // - число цветовых битов на плоскость
-                                        //1, 2, 4, 8
-    unsigned short x_min;            //
-    unsigned short y_min;            //
-    unsigned short x_max;            //
-    unsigned short y_max;            //
-    unsigned short h_res;            //- разрешение дисплея по горизонтали (единицы неизвестны)
-    unsigned short v_res;            //- разрешение дисплея по вертикали (единицы неизвестны)
-    RGB palette[16];                //- RGB-палитра для 4-битных изображений
-    unsigned char video_mode;        //- номер видеорежима (список номеров режимов неизвестен)
-    unsigned char num_planes;        //- число плоскостей
-    unsigned short bytes_per_line;    //- размер буфера строки в байтах
-    unsigned short palette_type;    //- тип палитры: серая или цветная
-                                        //крайне противоречивые сведения
-    unsigned short sh_res;            //- разрешение сканера по горизонтали (единицы неизвестны)
-    unsigned short sv_res;            //- разрешение сканера по вертикали (единицы неизвестны)
-    char reserved[54];                //- отведено для будущих версий формата (не дай Бог!)
+    unsigned char manufacturer;    // - изготовитель
+                                   // всегда 10
+    unsigned char version;         // - версия
+                                   // 0 - 2.5 без палитры (монохромная)
+                                   // 2 - 2.8 с палитрой (4-битная)
+                                   // 3    - 2.8/3.0 без палитры (8-битная)
+                                   // 4 - нет палитры?
+                                   // 5 - 3.0 с палитрой.
+    unsigned char encoding;        // - тип кодирования
+                                   // всегда 1
+    unsigned char bits_per_plane;  // - число цветовых битов на плоскость
+                                   // 1, 2, 4, 8
+    unsigned short x_min;
+    unsigned short y_min;
+    unsigned short x_max;
+    unsigned short y_max;
+    unsigned short h_res;          // - разрешение дисплея по горизонтали (единицы неизвестны)
+    unsigned short v_res;          // - разрешение дисплея по вертикали (единицы неизвестны)
+    RGB palette[16];               // - RGB-палитра для 4-битных изображений
+    unsigned char video_mode;      // - номер видеорежима (список номеров режимов неизвестен)
+    unsigned char num_planes;      // - число плоскостей
+    unsigned short bytes_per_line; // - размер буфера строки в байтах
+    unsigned short palette_type;   // - тип палитры: серая или цветная
+                                   // крайне противоречивые сведения
+    unsigned short sh_res;         // - разрешение сканера по горизонтали (единицы неизвестны)
+    unsigned short sv_res;         // - разрешение сканера по вертикали (единицы неизвестны)
+    char reserved[54];             // - отведено для будущих версий формата (не дай Бог!)
 };
 #pragma pack(pop)
 
-//Перечисляются все возможные сочетания полей bits_per_plane и num_planes
+// Перечисляются все возможные сочетания полей bits_per_plane и num_planes
 const int PCX_NUM_TYPES    =6;
 const unsigned char pcx_bits_per_plane[PCX_NUM_TYPES]    ={1,2,1,1,8,8};
 const unsigned char pcx_num_planes[PCX_NUM_TYPES]        ={1,1,3,4,1,3};
 
-//Таблица для масштабирования 6-битных элементов палитры в 8-битные
+// Таблица для масштабирования 6-битных элементов палитры в 8-битные
 const unsigned char scale63to255[]=
     {
     0x00,0x04,0x08,0x0C,0x10,0x14,0x18,0x1C,0x20,0x24,0x28,0x2D,0x31,0x35,0x39,0x3D,
@@ -51,10 +51,10 @@ const unsigned char scale63to255[]=
     0xC2,0xC6,0xCA,0xCE,0xD2,0xD7,0xDB,0xDF,0xE3,0xE7,0xEB,0xEF,0xF3,0xF7,0xFB,0xFF
     };
 
-//Процедура для декодирования и загрузки строки в буфер из файла
+// Процедура для декодирования и загрузки строки в буфер из файла
 bool loadLinePCX(FILE *file,unsigned char *line_buffer,unsigned bytes_per_line)
 {
-//Заполняем буфер строки
+    // Заполняем буфер строки
     unsigned j=0;
     while (j<bytes_per_line)
     {
@@ -89,7 +89,7 @@ bool loadLinePCX(FILE *file,unsigned char *line_buffer,unsigned bytes_per_line)
     }
     return true;
 }
-//Метод для загрузки изображений
+// Метод для загрузки изображений
 bool Texture::LoadPCXTexture(const char *file_name)
 {
     FreeTexture();
@@ -136,9 +136,9 @@ bool Texture::LoadPCXTexture(const char *file_name)
                     pcx_header.bits_per_plane,pcx_header.num_planes);
                 return false;
             case 4:
-                //Здесь грузятся 8-битные картинки, в которых не происходит переноса
-                //RLE-кодирования через строки.
-                //Если ПЕРЕНОС МЕЖДУ СТРОК есть, изображение НЕ ЗАГРУЗИТСЯ!
+                // Здесь грузятся 8-битные картинки, в которых не происходит переноса
+                // RLE-кодирования через строки.
+                // Если ПЕРЕНОС МЕЖДУ СТРОК есть, изображение НЕ ЗАГРУЗИТСЯ!
                 //fprintf(stderr,"loading 8-bit pcx-file.\n");
                 if ((line_buffer=(unsigned char *)malloc(pcx_header.bytes_per_line))==NULL)
                 {
@@ -156,7 +156,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                     fprintf(stderr,"Could not get memory for pixels of PCX-file.\n");
                     return false;
                 }
-                //Цикл по строкам
+                // Цикл по строкам
                 for(j=0;j<height;j++)
                 {
                     if (!loadLinePCX(file,line_buffer,pcx_header.bytes_per_line))
@@ -166,11 +166,11 @@ bool Texture::LoadPCXTexture(const char *file_name)
                         fclose(file);
                         return false;
                     }
-                    //Копирование считанной строки, выравнивающие байты не копируются
+                    // Копирование считанной строки, выравнивающие байты не копируются
                     memcpy(((unsigned char *)data)+j*width+256*sizeof(RGB),line_buffer,width);
                 }
                 free(line_buffer);
-                //Осталось прочесть палитру
+                // Осталось прочесть палитру
                 int byte=fgetc(file);
                 if (byte==EOF)
                 {

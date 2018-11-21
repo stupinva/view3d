@@ -3,33 +3,33 @@
 #include "misc.h"
 #include "model.h"
 
-/////////////////////////////////////////////////////////////////////////////////////
-//04-07-2003                                                                       //
-//Загрузка моделей Quake 2 из MD2-файлов, формат с идентификатором IDP2, версия №8.//
-/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+// 04-07-2003                                                                       //
+// Загрузка моделей Quake 2 из MD2-файлов, формат с идентификатором IDP2, версия №8 //
+//////////////////////////////////////////////////////////////////////////////////////
 #pragma pack(push,1)
 struct IDP2Header
 {
-    char ident[4];                //Идентификатор, должен быть "IDP2".
-    unsigned long version;        //Версия 8.
+    char ident[4];               // Идентификатор, должен быть "IDP2"
+    unsigned long version;       // Версия 8
 
-    unsigned long skin_width;    //Ширина текстуры.
-    unsigned long skin_height;    //Высота текстуры.
-    unsigned long frame_size;    //Размер кадра в байтах.
+    unsigned long skin_width;    // Ширина текстуры
+    unsigned long skin_height;   // Высота текстуры
+    unsigned long frame_size;    // Размер кадра в байтах
 
-    unsigned long num_skins;    //Количество текстур.
-    unsigned long num_vertices;    //Количество вершин.
-    unsigned long num_points;    //Количество точек на текстуре.
-    unsigned long num_triangles;//Количество треугольников.
-    unsigned long num_glcmds;    //Количество двойных слов в списке команд полос/вееров.
-    unsigned long num_frames;    //Количество кадров.
+    unsigned long num_skins;     // Количество текстур
+    unsigned long num_vertices;  // Количество вершин
+    unsigned long num_points;    // Количество точек на текстуре
+    unsigned long num_triangles; // Количество треугольников
+    unsigned long num_glcmds;    // Количество двойных слов в списке команд полос/вееров
+    unsigned long num_frames;    // Количество кадров
 
-    unsigned long ofs_skins;    //Смещение текстур - строк из 64 символов.
-    unsigned long ofs_points;    //Смещение массива точек в файле (в байтах).
-    unsigned long ofs_triangles;//Смещение треугольников.
-    unsigned long ofs_frames;    //Смещение первого кадра.
-    unsigned long ofs_glcmds;    //Смещение списка команд полос/вееров.
-    unsigned long ofs_end;        //Конец файла.
+    unsigned long ofs_skins;     // Смещение текстур - строк из 64 символов
+    unsigned long ofs_points;    // Смещение массива точек в файле (в байтах)
+    unsigned long ofs_triangles; // Смещение треугольников
+    unsigned long ofs_frames;    // Смещение первого кадра
+    unsigned long ofs_glcmds;    // Смещение списка команд полос/вееров
+    unsigned long ofs_end;       // Конец файла
 };
 struct IDP2Point
 {
@@ -48,9 +48,9 @@ struct IDP2Vertex
 };
 struct IDP2FrameHeader
 {
-    Vector3D scale;        //Каждую координату упакованной вершины нужно
-                        //умножить на соответствующую координату этого вектора...
-    Vector3D translate;    //и затем прибавить соответствующую координату этого вектора.
+    Vector3D scale;     // Каждую координату упакованной вершины нужно
+                        // умножить на соответствующую координату этого вектора...
+    Vector3D translate; // и затем прибавить соответствующую координату этого вектора.
     char name[16];
 };
 #pragma pack(pop)
@@ -58,14 +58,14 @@ struct IDP2FrameHeader
 bool Model::LoadIDP2Model(const char *file_name)
 {
     fprintf(stdout,"Loading Quake 2 MD2-file \"%s\".\n",file_name);
-    //Открываем файл модели.
+    // Открываем файл модели
     FILE *file;
     if ((file=fopen(file_name,"rb"))==NULL)
     {
         fprintf(stderr,"Could not open file \"%s\".\n",file_name);
         return false;
     }
-    //Читаем заголовок, проверяем идентификатор и версию.
+    // Читаем заголовок, проверяем идентификатор и версию
     IDP2Header header;
     if (fread(&header,sizeof(header),1,file)!=1)
     {
@@ -85,7 +85,7 @@ bool Model::LoadIDP2Model(const char *file_name)
         fprintf(stderr,"Supports only version #8 of Quake 2 MD2-file.\n");
         return false;
     }
-    //Выделяем память подо все массивы модели.
+    // Выделяем память подо все массивы модели
     if (!NewModel(header.num_skins,header.num_points,1,header.num_triangles,header.num_frames,
             header.num_vertices))
     {
@@ -93,7 +93,7 @@ bool Model::LoadIDP2Model(const char *file_name)
         return false;
     }
     ExtractName(file_name,name);
-    //Грузим текстуры модели.
+    // Грузим текстуры модели
     fseek(file,header.ofs_skins,SEEK_SET);
     for(unsigned i=0;i<header.num_skins;i++)
     {
@@ -114,7 +114,7 @@ bool Model::LoadIDP2Model(const char *file_name)
         }*/
     }
     fprintf(stdout,"%d skins loaded.\n",num_skins);
-    //Грузим точки - координаты вершин на текстуре.
+    // Грузим точки - координаты вершин на текстуре
     fseek(file,header.ofs_points,SEEK_SET);
     float scale_width=1.0f/(float)header.skin_width;
     float scale_height=1.0f/(float)header.skin_height;
@@ -133,7 +133,7 @@ bool Model::LoadIDP2Model(const char *file_name)
         points[i][1]=(float)point.t*scale_height;
     }
     fprintf(stdout,"%d points loaded.\n",num_points);
-    //Грузим треугольники.
+    // Грузим треугольники
     strcpy(meshes[0].name,name);
     meshes[0].first_skin=0;
     meshes[0].num_skins=num_skins;
@@ -158,7 +158,7 @@ bool Model::LoadIDP2Model(const char *file_name)
         }
     }
     fprintf(stdout,"%d triangles loaded.\n",num_triangles);
-    //Грузим кадры.
+    // Грузим кадры
     fseek(file,header.ofs_frames,SEEK_SET);
     for(unsigned i=0;i<header.num_frames;i++)
     {
@@ -194,7 +194,7 @@ bool Model::LoadIDP2Model(const char *file_name)
     }
     fclose(file);
     fprintf(stdout,"%d frames loaded.   \n",num_frames);
-    //Теперь можно посчитать нормали, проверить модель, хлебнуть пивка или ещё что-нибудь...
+    // Теперь можно посчитать нормали, проверить модель, хлебнуть пивка или ещё что-нибудь...
     fprintf(stderr,"Calculating normals.\r");;
     if (CalculateNormals())
         fprintf(stdout,"Normals calculated. \n");

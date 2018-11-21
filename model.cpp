@@ -52,22 +52,22 @@ bool Model::NewModel(unsigned arg_num_skins,
                     unsigned arg_num_vertices
                     )
 {
-    //Удаляем уже загруженную модель, если она есть.
+    // Удаляем уже загруженную модель, если она есть
     FreeModel();
-    //Выделяем память под имена текстур.
+    // Выделяем память под имена текстур
     if ((skin_indexes=(unsigned *)malloc(arg_num_skins*sizeof(*skin_indexes)))==NULL)
     {
         fprintf(stderr,"Could not get memory for skin names.\n");
         return false;
     }
-    //Выделяем память под точки - координаты вершин на текстуре.
+    // Выделяем память под точки - координаты вершин на текстуре
     if ((points=(Vector2D *)malloc(arg_num_points*sizeof(*points)))==NULL)
     {
         free(skin_indexes);
         fprintf(stderr,"Could not get memory for points.\n");
         return false;
     }
-    //Выделяем память под группы треугольников.
+    // Выделяем память под группы треугольников
     if ((meshes=(Mesh *)malloc(arg_num_meshes*sizeof(*meshes)))==NULL)
     {
         free(points);
@@ -75,7 +75,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr,"Could not get memory for meshes.\n");
         return false;
     }
-    //Выделяем память под треугольники.
+    // Выделяем память под треугольники
     if ((triangles=(Triangle *)malloc(arg_num_triangles*sizeof(*triangles)))==NULL)
     {
         free(meshes);
@@ -84,8 +84,8 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr,"Could not get memory for triangles.\n");
         return false;
     }
-    //Выделяем память под кадры:
-    //Выделяем память под имена кадров.
+    // Выделяем память под кадры:
+    // Выделяем память под имена кадров
     if ((frame_names=(ModelName *)malloc(arg_num_frames*sizeof(*frame_names)))==NULL)
     {
         free(triangles);
@@ -95,7 +95,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr,"Could not get memory for frame names.\n");
         return false;
     }
-    //Выделяем память под координаты вершин.
+    // Выделяем память под координаты вершин
     if ((vertex_positions=(Vector3D *)malloc(arg_num_frames*arg_num_vertices*
             sizeof(*vertex_positions)))==NULL)
     {
@@ -107,7 +107,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr,"Could not get memory for vertex positions.\n");
         return false;
     }
-    //Выделяем память под нормали к вершинам.
+    // Выделяем память под нормали к вершинам
     if ((vertex_normals=(Vector3D *)malloc(arg_num_frames*arg_num_vertices*
             sizeof(*vertex_normals)))==NULL)
     {
@@ -120,7 +120,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr,"Could not get memory for vertex normals.\n");
         return false;
     }
-    //Выделяем память под нормали к треугольникам.
+    // Выделяем память под нормали к треугольникам
     if ((triangle_normals=(Vector3D *)malloc(arg_num_frames*arg_num_triangles*
             sizeof(*triangle_normals)))==NULL)
     {
@@ -134,7 +134,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr,"Could not get memory for triangle normals.\n");
         return false;
     }
-    //Наконец-то память подо все массивы успешно выделена, запоминаем новое состояноие модели.
+    // Наконец-то память подо все массивы успешно выделена, запоминаем новое состояноие модели
     num_skins=arg_num_skins;
     num_points=arg_num_points;
     num_meshes=arg_num_meshes;
@@ -159,7 +159,7 @@ bool Model::CalculateNormals(void)
         Vector3D *frame_vertex_positions=&vertex_positions[i*num_vertices];
         Vector3D *frame_vertex_normals=&vertex_normals[i*num_vertices];
         Vector3D *frame_triangle_normals=&triangle_normals[i*num_triangles];
-        //Обнуляем нормали к вершинам текущего кадра и делитель.
+        // Обнуляем нормали к вершинам текущего кадра и делитель
         for(unsigned j=0;j<num_vertices;j++)
         {
             frame_vertex_normals[j][0]=0.0f;
@@ -172,7 +172,7 @@ bool Model::CalculateNormals(void)
             unsigned vertex_indexes[3];
             for(unsigned k=0;k<3;k++)
                 vertex_indexes[k]=triangles[j].vertex_indexes[k];
-            //Вычисляем нормали к треугольникам текущего кадра.
+            // Вычисляем нормали к треугольникам текущего кадра
             Vector3D u;
             VectorSub
             (
@@ -191,7 +191,7 @@ bool Model::CalculateNormals(void)
             CrossProduct(u,v,triangle_normal);
             VectorNormalize(triangle_normal,triangle_normal);
             VectorCopy(triangle_normal,frame_triangle_normals[j]);
-            //Добавляем к нормалям вершин, принадлежащих текущему треугольнику его нормаль.
+            // Добавляем к нормалям вершин, принадлежащих текущему треугольнику его нормаль
             for(unsigned k=0;k<3;k++)
             {
                 VectorAdd
@@ -203,7 +203,7 @@ bool Model::CalculateNormals(void)
                 vertex_normal_denominators[vertex_indexes[k]]++;
             }
         }
-        //Вычисляем норамли к вершинам текущего кадра.
+        // Вычисляем норамли к вершинам текущего кадра
         for(unsigned j=0;j<num_vertices;j++)
             VectorScale
             (
