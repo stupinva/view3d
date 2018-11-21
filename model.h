@@ -56,29 +56,29 @@ public:
     Model(void);
     ~Model(void);
     bool NewModel(unsigned arg_num_skins,
-                    unsigned arg_num_points,
-                    unsigned arg_num_meshes,
-                    unsigned arg_num_triangles,
-                    unsigned arg_num_frames,
-                    unsigned arg_num_vertices
-                    );
+                  unsigned arg_num_points,
+                  unsigned arg_num_meshes,
+                  unsigned arg_num_triangles,
+                  unsigned arg_num_frames,
+                  unsigned arg_num_vertices
+                 );
     void FreeModel(void);
     bool LoadIDP2Model(const char *file_name);
     bool CalculateNormals(void);
     float GetBoundRadius(void);
     // Освещение: 0 - нет, 1 - Ламберта, 2 - Гуро, (3 - Фонга)
-    void DrawModel(unsigned lighting,unsigned frame);
+    void DrawModel(unsigned lighting, unsigned frame);
     unsigned GetNumFrames(void);
     void DumpModel(void);
 };
 
-void VectorCopy(Vector3D a,Vector3D ans);
-void CrossProduct(Vector3D a,Vector3D b,Vector3D ans);
-void VectorSub(Vector3D a,Vector3D b,Vector3D ans);
-void VectorAdd(Vector3D a,Vector3D b,Vector3D ans);
-void VectorScale(Vector3D a,float f,Vector3D ans);
+void VectorCopy(Vector3D a, Vector3D ans);
+void CrossProduct(Vector3D a, Vector3D b, Vector3D ans);
+void VectorSub(Vector3D a, Vector3D b, Vector3D ans);
+void VectorAdd(Vector3D a, Vector3D b, Vector3D ans);
+void VectorScale(Vector3D a, float f, Vector3D ans);
 float VectorLength(Vector3D v);
-void VectorNormalize(Vector3D a,Vector3D ans);
+void VectorNormalize(Vector3D a, Vector3D ans);
 
 // Кэш текстур, здесь хранятся все текстуры для всех загруженных моделей
 //extern Textures textures_cashe;

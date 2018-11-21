@@ -15,11 +15,11 @@ struct RGB
 };
 #endif
 
-const unsigned TEXTURE_NOT_LOADED    =0;
-const unsigned TEXTURE_QUAKE        =1;
-const unsigned TEXTURE_QUAKE2        =2;
-const unsigned TEXTURE_INDEX_RGB    =3;
-const unsigned TEXTURE_RGB            =4;
+const unsigned TEXTURE_NOT_LOADED = 0;
+const unsigned TEXTURE_QUAKE = 1;
+const unsigned TEXTURE_QUAKE2 = 2;
+const unsigned TEXTURE_INDEX_RGB = 3;
+const unsigned TEXTURE_RGB = 4;
 
 struct Texture
 {
