@@ -201,11 +201,11 @@ bool Model::LoadIDP2Model(const char *file_name)
 	else
 		FreeModel();
 	fprintf(stdout,"Memory usage:\n"
-		"%d\tskins\t\t%d\n"
-		"%d\tpoints\t\t%d\n"
-		"%d\tmeshes\t\t%d\n"
-		"%d\ttrianles\t%d\n"
-		"%d\tframes\t\t%d\n",
+		"%d\tskins\t\t%lu\n"
+		"%d\tpoints\t\t%lu\n"
+		"%d\tmeshes\t\t%lu\n"
+		"%d\ttrianles\t%lu\n"
+		"%d\tframes\t\t%lu\n",
 		num_skins,num_skins*sizeof(*skin_indexes),
 		num_points,num_points*sizeof(*points),
 		num_meshes,num_meshes*sizeof(*meshes),
