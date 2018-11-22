@@ -1,20 +1,9 @@
-#include <windows.h>
-#include <GL/glaux.h>
 #include <stdio.h>
+#include <SDL2/SDL.h>
+#include <GL/gl.h>
 #include "events.h"
 
-static void CALLBACK CALLBACK_Draw(void)
-{
-    Draw();
-    auxSwapBuffers();
-}
-
-static void CALLBACK CALLBACK_Reshape(unsigned width, unsigned height)
-{
-    Reshape(width, height);
-}
-
-void main(int carg, char **varg)
+int main(int carg, char **varg)
 {
     if (carg != 2)
     {
@@ -40,7 +29,7 @@ void main(int carg, char **varg)
                         "\t\tRight arrow\t- rotate camera right,\n"
                         "\t\tUp arrow\t- rotate camera up,\n"
                         "\t\tDown arrow\t- rotate camera down.\n");
-        return;
+        return 1;
     }
     if (Init(varg[1]) != 0)
     {
@@ -48,25 +37,143 @@ void main(int carg, char **varg)
         return 1;
     }
 
-    auxInitPosition(0, 0, 800, 600);
-    auxInitDisplayMode(AUX_RGB | AUX_DOUBLE);
-    if (auxInitWindow("view3d") == GL_FALSE)
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        auxQuit();
+        fprintf(stderr, "main: failed to initialize SDL, %s\n", SDL_GetError());
+        return 1;
     }
 
-    auxKeyFunc(AUX_q, (AUXKEYPROC)DistUp);
-    auxKeyFunc(AUX_a, (AUXKEYPROC)DistDown);
-    auxKeyFunc(AUX_z, (AUXKEYPROC)PrevFrame);
-    auxKeyFunc(AUX_x, (AUXKEYPROC)NextFrame);
+    if (SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8) < 0)
+    {
+        fprintf(stderr, "main: failed to set red size, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    if (SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8) < 0)
+    {
+        fprintf(stderr, "main: failed to set green size, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    if (SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8) < 0)
+    {
+        fprintf(stderr, "main: failed to set blue size, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    if (SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1) < 0)
+    {
+        fprintf(stderr, "main: failed to enable double buffer, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    if (SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16) < 0)
+    {
+        fprintf(stderr, "main: failed to set depth buffer size, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
 
-    auxKeyFunc(AUX_l, (AUXKEYPROC)SwitchLighting);
+    SDL_Window *window = SDL_CreateWindow("View3D-SDL", SDL_WINDOWPOS_UNDEFINED,
+                                                        SDL_WINDOWPOS_UNDEFINED,
+                                                        800,
+                                                        600,
+                                                        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    if (window == NULL)
+    {
+        fprintf(stderr, "main: failed to create window, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    SDL_GLContext glcontext = SDL_GL_CreateContext(window);
+    if (glcontext == NULL)
+    {
+        fprintf(stderr, "main: failed to create OpenGL context, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    if (SDL_GL_MakeCurrent(window, glcontext) < 0)
+    {
+        fprintf(stderr, "main: failed to switch OpenGL context, %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
 
-    auxKeyFunc(AUX_UP, (AUXKEYPROC)YawUp);
-    auxKeyFunc(AUX_DOWN, (AUXKEYPROC)YawDown);
-    auxKeyFunc(AUX_LEFT, (AUXKEYPROC)AngleLeft);
-    auxKeyFunc(AUX_RIGHT, (AUXKEYPROC)AngleRight);
+    int quit = 0;
+    while (quit != 1)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event) != 0)
+        {
+            switch (event.type)
+            {
+                case SDL_QUIT:
+                    quit = 1;
+                    break;
 
-    auxReshapeFunc((AUXRESHAPEPROC)CALLBACK_Reshape);
-    auxMainLoop(CALLBACK_Draw);
+                case SDL_WINDOWEVENT:
+                    switch (event.window.event)
+                    {
+                        case SDL_WINDOWEVENT_RESIZED:
+                        case SDL_WINDOWEVENT_SIZE_CHANGED:
+                            Reshape(event.window.data1, event.window.data2);
+                        break;
+                    }
+                    break;
+
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym)
+                    {
+                        case SDLK_ESCAPE:
+                            quit = 1;
+                            break;
+
+                        case SDLK_q:
+                            DistUp();
+                            break;
+
+                        case SDLK_a:
+                            DistDown();
+                            break;
+
+                        case SDLK_z:
+                            PrevFrame();
+                            break;
+
+                        case SDLK_x:
+                            NextFrame();
+                            break;
+
+                        case SDLK_l:
+                            SwitchLighting();
+                            break;
+
+                        case SDLK_UP:
+                            YawUp();
+                            break;
+
+                        case SDLK_DOWN:
+                            YawDown();
+                            break;
+
+                        case SDLK_LEFT:
+                            AngleLeft();
+                            break;
+
+                        case SDLK_RIGHT:
+                            AngleRight();
+                            break;
+                    }
+                    break;
+            } 
+        }
+
+        Draw();
+
+        // Меняем буферы местами
+        SDL_GL_SwapWindow(window);
+    }
+
+    SDL_Quit();
+    return 0;
 }
