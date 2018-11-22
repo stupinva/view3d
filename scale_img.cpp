@@ -22,14 +22,15 @@ void min_max_round(float x, dst2src *d2s)
 bool ScaleRGBWidth(unsigned src_width, unsigned height, RGB *src_pixels,
                    unsigned dst_width, RGB **dst_pixels)
 {
-    dst2src *dst2src_x;
-    if (dst2src_x = (dst2src *)malloc((dst_width + 1) * sizeof(dst2src)))
+    dst2src *dst2src_x= (dst2src *)malloc((dst_width + 1) * sizeof(dst2src));
+    if (dst2src_x == NULL)
     {
         fprintf(stderr, "Could not get memory for resizing image.\n");
         return false;
     }
 
-    if ((*dst_pixels = (RGB *)malloc(height * dst_width * sizeof(RGB))) == NULL)
+    *dst_pixels = (RGB *)malloc(height * dst_width * sizeof(RGB));
+    if (*dst_pixels == NULL)
     {
         free(dst2src_x);
         fprintf(stderr, "Could not get memory for resized image.\n");

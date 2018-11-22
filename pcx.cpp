@@ -91,8 +91,8 @@ bool Texture::LoadPCXTexture(const char *file_name)
 {
     FreeTexture();
 
-    FILE *file;
-    if ((file = fopen(file_name, "rb")) == NULL)
+    FILE *file = fopen(file_name, "rb");
+    if (file == NULL)
     {
         fprintf(stderr, "Could not open PCX-file \"%s\".\n", file_name);
         return false;
@@ -144,7 +144,8 @@ bool Texture::LoadPCXTexture(const char *file_name)
                     // RLE-кодирования через строки.
                     // Если ПЕРЕНОС МЕЖДУ СТРОК есть, изображение НЕ ЗАГРУЗИТСЯ!
                     //fprintf(stderr, "loading 8-bit pcx-file.\n");
-                    if ((line_buffer = (unsigned char *)malloc(pcx_header.bytes_per_line)) == NULL)
+                    line_buffer = (unsigned char *)malloc(pcx_header.bytes_per_line);
+                    if (line_buffer == NULL)
                     {
                         fclose(file);
                         fprintf(stderr, "Could not get memory for line of PCX-file.\n");
@@ -153,7 +154,8 @@ bool Texture::LoadPCXTexture(const char *file_name)
                     width = pcx_header.x_max - pcx_header.x_min + 1;
                     height = pcx_header.y_max - pcx_header.y_min + 1;
 
-                    if ((data = malloc(256 * sizeof(RGB) + width * height)) == NULL)
+                    data = malloc(256 * sizeof(RGB) + width * height);
+                    if (data == NULL)
                     {
                         free(line_buffer);
                         fclose(file);
@@ -190,7 +192,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                     {
                         for(j = 0; j < 256; j++)
                         {
-                            int red, green, blue;
+                            int red, green, blue;   
                             if ((red = fgetc(file)) != EOF)
                             {
                                 ((RGB *)data)[j].red = (unsigned char)red;

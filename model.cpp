@@ -61,14 +61,16 @@ bool Model::NewModel(unsigned arg_num_skins,
     FreeModel();
 
     // Выделяем память под имена текстур
-    if ((skin_indexes = (unsigned *)malloc(arg_num_skins * sizeof(*skin_indexes))) == NULL)
+    skin_indexes = (unsigned *)malloc(arg_num_skins * sizeof(*skin_indexes));
+    if (skin_indexes == NULL)
     {
         fprintf(stderr, "Could not get memory for skin names.\n");
         return false;
     }
 
     // Выделяем память под точки - координаты вершин на текстуре
-    if ((points = (Vector2D *)malloc(arg_num_points * sizeof(*points))) == NULL)
+    points = (Vector2D *)malloc(arg_num_points * sizeof(*points));
+    if (points == NULL)
     {
         free(skin_indexes);
         fprintf(stderr, "Could not get memory for points.\n");
@@ -76,7 +78,8 @@ bool Model::NewModel(unsigned arg_num_skins,
     }
 
     // Выделяем память под группы треугольников
-    if ((meshes = (Mesh *)malloc(arg_num_meshes * sizeof(*meshes))) == NULL)
+    meshes = (Mesh *)malloc(arg_num_meshes * sizeof(*meshes));
+    if (meshes == NULL)
     {
         free(points);
         free(skin_indexes);
@@ -85,7 +88,8 @@ bool Model::NewModel(unsigned arg_num_skins,
     }
 
     // Выделяем память под треугольники
-    if ((triangles = (Triangle *)malloc(arg_num_triangles * sizeof(*triangles))) == NULL)
+    triangles = (Triangle *)malloc(arg_num_triangles * sizeof(*triangles));
+    if (triangles == NULL)
     {
         free(meshes);
         free(points);
@@ -96,7 +100,8 @@ bool Model::NewModel(unsigned arg_num_skins,
 
     // Выделяем память под кадры:
     // Выделяем память под имена кадров
-    if ((frame_names = (ModelName *)malloc(arg_num_frames * sizeof(*frame_names))) == NULL)
+    frame_names = (ModelName *)malloc(arg_num_frames * sizeof(*frame_names));
+    if (frame_names == NULL)
     {
         free(triangles);
         free(meshes);
@@ -107,8 +112,8 @@ bool Model::NewModel(unsigned arg_num_skins,
     }
 
     // Выделяем память под координаты вершин
-    if ((vertex_positions = (Vector3D *)malloc(arg_num_frames * arg_num_vertices *
-            sizeof(*vertex_positions))) == NULL)
+    vertex_positions = (Vector3D *)malloc(arg_num_frames * arg_num_vertices * sizeof(*vertex_positions));
+    if (vertex_positions == NULL)
     {
         free(frame_names);
         free(triangles);
@@ -120,8 +125,8 @@ bool Model::NewModel(unsigned arg_num_skins,
     }
 
     // Выделяем память под нормали к вершинам
-    if ((vertex_normals = (Vector3D *)malloc(arg_num_frames * arg_num_vertices *
-            sizeof(*vertex_normals))) == NULL)
+    vertex_normals = (Vector3D *)malloc(arg_num_frames * arg_num_vertices * sizeof(*vertex_normals));
+    if (vertex_normals == NULL)
     {
         free(vertex_positions);
         free(frame_names);
@@ -134,8 +139,8 @@ bool Model::NewModel(unsigned arg_num_skins,
     }
 
     // Выделяем память под нормали к треугольникам
-    if ((triangle_normals = (Vector3D *)malloc(arg_num_frames * arg_num_triangles *
-            sizeof(*triangle_normals))) == NULL)
+    triangle_normals = (Vector3D *)malloc(arg_num_frames * arg_num_triangles * sizeof(*triangle_normals));
+    if (triangle_normals == NULL)
     {
         free(vertex_normals);
         free(vertex_positions);
@@ -165,9 +170,8 @@ bool Model::CalculateNormals(void)
         return false;
     }
 
-    unsigned *vertex_normal_denominators;
-    if ((vertex_normal_denominators = (unsigned *)malloc(num_vertices *
-        sizeof(*vertex_normal_denominators))) == NULL)
+    unsigned *vertex_normal_denominators = (unsigned *)malloc(num_vertices * sizeof(*vertex_normal_denominators));
+    if (vertex_normal_denominators == NULL)
     {
         fprintf(stderr, "Could not calculate normals.\n");
         return false;

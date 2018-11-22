@@ -73,8 +73,8 @@ bool Model::LoadIDP2Model(const char *file_name)
     fprintf(stdout, "Loading Quake 2 MD2-file \"%s\".\n", file_name);
 
     // Открываем файл модели
-    FILE *file;
-    if ((file = fopen(file_name, "rb")) == NULL)
+    FILE *file = fopen(file_name, "rb");
+    if (file == NULL)
     {
         fprintf(stderr, "Could not open file \"%s\".\n", file_name);
         return false;
@@ -88,7 +88,7 @@ bool Model::LoadIDP2Model(const char *file_name)
         fprintf(stderr, "Could not read MD2-file header.\n");
         return false;
     }
-    if (memcmp(header.ident, "IDP2", sizeof(header.ident)))
+    if (memcmp(header.ident, "IDP2", sizeof(header.ident)) != 0)
     {
         fclose(file);
         fprintf(stderr, "Not a Quake 2 MD2-file.\n");
@@ -124,7 +124,8 @@ bool Model::LoadIDP2Model(const char *file_name)
         }
 
         /*
-        if ((skin_indexes = LoadTexture(skin_name)) == -1)
+        skin_indexes = LoadTexture(skin_name);
+        if (skin_indexes == -1)
         {
             FreeModel();
             fclose(file);
@@ -218,8 +219,7 @@ bool Model::LoadIDP2Model(const char *file_name)
 
             for(unsigned k = 0; k < 3; k++)
             {
-                frame_vertex_positions[j][k] = frame_header.scale[k] * (float)vertex.packed_xyz[k]
-                    + frame_header.translate[k];
+                frame_vertex_positions[j][k] = frame_header.scale[k] * (float)vertex.packed_xyz[k] + frame_header.translate[k];
             }
         }
     }

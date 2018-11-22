@@ -55,7 +55,8 @@ bool Texture::ConvertTexture(void)
         return false;
     }
 
-    if ((dst_pixels = (RGB *)malloc(width * height * sizeof(*dst_pixels))) == NULL)
+    dst_pixels = (RGB *)malloc(width * height * sizeof(*dst_pixels));
+    if (dst_pixels == NULL)
     {
         fprintf(stderr, "Could not get memory for pixels.\n");
         return false;
