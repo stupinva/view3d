@@ -9,10 +9,12 @@ Texture::Texture(void)
     name[0] = 0;
     type = TEXTURE_NOT_LOADED;
 }
+
 Texture::~Texture(void)
 {
     FreeTexture();
 }
+
 void Texture::FreeTexture(void)
 {
     if (type != TEXTURE_NOT_LOADED)
@@ -54,8 +56,10 @@ bool Texture::ConvertTexture(void)
         fprintf(stderr, "Could not get memory for pixels.\n");
         return false;
     }
+
     for(unsigned i = 0; i < width * height; i++)
         dst_pixels[i] = src_palette[src_pixels[i]];
+
     free(data);
     data = dst_pixels;
     type = TEXTURE_RGB;
@@ -68,6 +72,7 @@ bool Texture::DrawTexture(void)
 
     if (type != TEXTURE_RGB)
         ConvertTexture();
+
     if (type == TEXTURE_RGB)
     {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

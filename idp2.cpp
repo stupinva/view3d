@@ -7,6 +7,7 @@
 // 04-07-2003                                                                       //
 // Загрузка моделей Quake 2 из MD2-файлов, формат с идентификатором IDP2, версия №8 //
 //////////////////////////////////////////////////////////////////////////////////////
+
 #pragma pack(push,1)
 struct IDP2Header
 {
@@ -31,21 +32,25 @@ struct IDP2Header
     unsigned long ofs_glcmds;    // Смещение списка команд полос/вееров
     unsigned long ofs_end;       // Конец файла
 };
+
 struct IDP2Point
 {
     unsigned short s;
     unsigned short t;
 };
+
 struct IDP2Triangle
 {
     unsigned short vertex_indexes[3];
     unsigned short point_indexes[3];
 };
+
 struct IDP2Vertex
 {
     unsigned char packed_xyz[3];
     unsigned char light_normal_index;
 };
+
 struct IDP2FrameHeader
 {
     Vector3D scale;     // Каждую координату упакованной вершины нужно
@@ -58,6 +63,7 @@ struct IDP2FrameHeader
 bool Model::LoadIDP2Model(const char *file_name)
 {
     fprintf(stdout, "Loading Quake 2 MD2-file \"%s\".\n", file_name);
+
     // Открываем файл модели
     FILE *file;
     if ((file = fopen(file_name, "rb")) == NULL)
@@ -65,6 +71,7 @@ bool Model::LoadIDP2Model(const char *file_name)
         fprintf(stderr, "Could not open file \"%s\".\n", file_name);
         return false;
     }
+
     // Читаем заголовок, проверяем идентификатор и версию
     IDP2Header header;
     if (fread(&header, sizeof(header), 1, file) != 1)
@@ -85,6 +92,7 @@ bool Model::LoadIDP2Model(const char *file_name)
         fprintf(stderr, "Supports only version #8 of Quake 2 MD2-file.\n");
         return false;
     }
+
     // Выделяем память подо все массивы модели
     if (!NewModel(header.num_skins, header.num_points, 1, header.num_triangles, header.num_frames,
             header.num_vertices))
@@ -92,7 +100,9 @@ bool Model::LoadIDP2Model(const char *file_name)
         fclose(file);
         return false;
     }
+
     ExtractName(file_name, name);
+
     // Грузим текстуры модели
     fseek(file, header.ofs_skins, SEEK_SET);
     for(unsigned i = 0; i < header.num_skins; i++)
@@ -106,6 +116,7 @@ bool Model::LoadIDP2Model(const char *file_name)
             fprintf(stderr, "Could not read skin name.\n");
             return false;
         }
+
         /*if ((skin_indexes = LoadTexture(skin_name)) == -1)
         {
             FreeModel();
@@ -114,6 +125,7 @@ bool Model::LoadIDP2Model(const char *file_name)
         }*/
     }
     fprintf(stdout, "%d skins loaded.\n", num_skins);
+
     // Грузим точки - координаты вершин на текстуре
     fseek(file, header.ofs_points, SEEK_SET);
     float scale_width = 1.0f / (float)header.skin_width;
@@ -133,11 +145,11 @@ bool Model::LoadIDP2Model(const char *file_name)
         points[i][1] = (float)point.t * scale_height;
     }
     fprintf(stdout, "%d points loaded.\n", num_points);
+
     // Грузим треугольники
     strcpy(meshes[0].name, name);
     meshes[0].first_skin = 0;
     meshes[0].num_skins = num_skins;
-
     fseek(file, header.ofs_triangles, SEEK_SET);
     for(unsigned i = 0; i < header.num_triangles; i++)
     {
@@ -150,6 +162,7 @@ bool Model::LoadIDP2Model(const char *file_name)
             fprintf(stderr, "Could not read triangle.\n");
             return false;
         }
+
         triangles[i].mesh_index = 0;
         for(unsigned j = 0; j < 3; j++)
         {
@@ -158,6 +171,7 @@ bool Model::LoadIDP2Model(const char *file_name)
         }
     }
     fprintf(stdout, "%d triangles loaded.\n", num_triangles);
+
     // Грузим кадры
     fseek(file, header.ofs_frames, SEEK_SET);
     for(unsigned i = 0; i < header.num_frames; i++)
@@ -171,6 +185,7 @@ bool Model::LoadIDP2Model(const char *file_name)
             fprintf(stderr, "Could not read frame header.\n");
             return false;
         }
+
         strcpy(frame_names[i], frame_header.name);
         Vector3D *frame_vertex_positions = &vertex_positions[i * num_vertices];
         for(unsigned j = 0; j < header.num_vertices; j++)
@@ -183,6 +198,7 @@ bool Model::LoadIDP2Model(const char *file_name)
                 fprintf(stderr, "Could not read frame vertex.\n");
                 return false;
             }
+
             /*Vector3D *frame_vertex_position = &frame_vertex_positions[j];
             for(unsigned k = 0; k < 3; k++)
                 frame_vertex_position[k] = frame_header.scale[k] * vertex[k] + frame_header.translate[k];
@@ -194,12 +210,14 @@ bool Model::LoadIDP2Model(const char *file_name)
     }
     fclose(file);
     fprintf(stdout, "%d frames loaded.   \n", num_frames);
+
     // Теперь можно посчитать нормали, проверить модель, хлебнуть пивка или ещё что-нибудь...
     fprintf(stderr, "Calculating normals.\r");;
     if (CalculateNormals())
         fprintf(stdout, "Normals calculated. \n");
     else
         FreeModel();
+
     fprintf(stdout, "Memory usage:\n"
                     "%d\tskins\t\t%lu\n"
                     "%d\tpoints\t\t%lu\n"

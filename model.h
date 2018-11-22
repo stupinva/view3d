@@ -1,10 +1,13 @@
 #ifndef __MODEL__
 #define __MODEL__
+
 #include "texture.h"
+
 /////////////////////////////////////////////////
 // 04-07-2003                                  //
 // Структуры модели, формат и кое-какие методы //
 /////////////////////////////////////////////////
+
 typedef float Vector2D[2];
 typedef float Vector3D[3];
 
@@ -82,4 +85,5 @@ void VectorNormalize(Vector3D a, Vector3D ans);
 
 // Кэш текстур, здесь хранятся все текстуры для всех загруженных моделей
 //extern Textures textures_cashe;
+
 #endif

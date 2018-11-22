@@ -8,7 +8,9 @@ void Model::DrawModel(unsigned lighting, unsigned frame)
         Vector3D *frame_vertex_positions = &vertex_positions[frame * num_vertices];
         Vector3D *frame_vertex_normals = &vertex_normals[frame * num_vertices];
         Vector3D *frame_triangle_normals = &triangle_normals[frame * num_triangles];
+
         unsigned i;
+
         glBegin(GL_TRIANGLES);
         switch (lighting)
         {
@@ -19,6 +21,7 @@ void Model::DrawModel(unsigned lighting, unsigned frame)
                         glVertex3fv(frame_vertex_positions[triangles[i].vertex_indexes[j]]);
                 }
                 break;
+
             case 1:
                 for(i = 0; i < num_triangles; i++)
                 {
@@ -27,6 +30,7 @@ void Model::DrawModel(unsigned lighting, unsigned frame)
                         glVertex3fv(frame_vertex_positions[triangles[i].vertex_indexes[j]]);
                 }
                 break;
+
             case 2:
                 for(i = 0; i < num_triangles; i++)
                 {

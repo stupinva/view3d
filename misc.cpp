@@ -10,8 +10,10 @@ void ExtractName(const char *path_name_ext, char *name)
     {
         if ((path_name_ext[i] == '\\') || (path_name_ext[i] == '/'))
             start_name = i + 1;
+
         if (path_name_ext[i] == '.')
             end_name = i;
+
         if (path_name_ext[i] == 0)
         {
             if (end_name == 0)
@@ -20,6 +22,7 @@ void ExtractName(const char *path_name_ext, char *name)
         }
         i++;
     }
+
     if (end_name >= start_name)
     {
         memcpy(name, &path_name_ext[start_name], end_name - start_name);

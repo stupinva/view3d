@@ -64,6 +64,7 @@ bool loadLinePCX(FILE *file, unsigned char *line_buffer, unsigned bytes_per_line
             fprintf(stderr, "Unexpected en of PCX-file.\n");
             return false;
         }
+
         if ((byte & 0xC0) == 0xC0)
         {
             int number = byte & 0x3F;
@@ -73,11 +74,13 @@ bool loadLinePCX(FILE *file, unsigned char *line_buffer, unsigned bytes_per_line
                 fprintf(stderr, "Unexpected en of PCX-file.\n");
                 return false;
             }
+
             if (j + number > bytes_per_line)
             {
                 fprintf(stderr, "Detected wrong RLE-code of PCX-file.\n");
                 return false;
             }
+
             while (number > 0)
             {
                 line_buffer[j++] = pixel;
@@ -89,16 +92,19 @@ bool loadLinePCX(FILE *file, unsigned char *line_buffer, unsigned bytes_per_line
     }
     return true;
 }
+
 // Метод для загрузки изображений
 bool Texture::LoadPCXTexture(const char *file_name)
 {
     FreeTexture();
+
     FILE *file;
     if ((file = fopen(file_name, "rb")) == NULL)
     {
         fprintf(stderr, "Could not open PCX-file \"%s\".\n", file_name);
         return false;
     }
+
     PCXHeader pcx_header;
     if (fread(&pcx_header, sizeof(pcx_header), 1, file) != 1)
     {
@@ -118,6 +124,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
         fprintf(stderr, "Supports only encoding #1 of PCX-file.\n\n");
         return false;
     }
+
     for(int pcx_type = 0; pcx_type < PCX_NUM_TYPES; pcx_type++)
         if ((pcx_header.bits_per_plane == pcx_bits_per_plane[pcx_type]) &&
             (pcx_header.num_planes == pcx_num_planes[pcx_type]))
@@ -125,6 +132,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
             {
                 unsigned char *line_buffer;
                 unsigned j;
+
                 case 0:
                 case 1:
                 case 2:
@@ -135,6 +143,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                                     "- unsupported type of PCX-file.\n",
                                     pcx_header.bits_per_plane, pcx_header.num_planes);
                     return false;
+
                 case 4:
                     // Здесь грузятся 8-битные картинки, в которых не происходит переноса
                     // RLE-кодирования через строки.
@@ -156,6 +165,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                         fprintf(stderr, "Could not get memory for pixels of PCX-file.\n");
                         return false;
                     }
+
                     // Цикл по строкам
                     for(j = 0; j < height; j++)
                     {
@@ -170,6 +180,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                         memcpy(((unsigned char *)data) + j * width + 256 * sizeof(RGB), line_buffer, width);
                     }
                     free(line_buffer);
+
                     // Осталось прочесть палитру
                     int byte = fgetc(file);
                     if (byte == EOF)
@@ -179,6 +190,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                         fprintf(stderr, "Unexpected end of PCX-file.\n");
                         return false;
                     }
+
                     if ((byte == 0x0C) || (byte == 0x0A))
                         for(j = 0; j < 256; j++)
                         {
@@ -196,6 +208,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                                     }
                                 }
                             }
+
                             free(data);
                             fclose(file);
                             fprintf(stderr, "Unexpected end of PCX-file.\n");
@@ -208,6 +221,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                         fprintf(stderr, "PCX-file without palette.\n");
                         return false;
                     }
+
                     if (byte == 0xC0)
                         for(j = 0; j < 256; j++)
                         {
@@ -216,6 +230,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                             ((RGB *)data)[j].blue = scale63to255[((RGB *)data)[j].blue];
                         }
                     fclose(file);
+
                     type = TEXTURE_INDEX_RGB;
                     strcpy(name, file_name);
                     return true;

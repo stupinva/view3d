@@ -92,54 +92,63 @@ static void SwitchLighting(void)
     if (lighting > 2)
         lighting = 0;
 }
+
 static void DistUp(void)
 {
     camera_dist -= 1.0f;
     if (camera_dist < zbuffer_min)
         camera_dist = zbuffer_min;
 }
+
 static void DistDown(void)
 {
     camera_dist += 1.0f;
     if (camera_dist > zbuffer_max)
         camera_dist = zbuffer_max;
 }
+
 static void PrevFrame(void)
 {
     frame--;
     if ((int)frame < 0)
         frame = 0;
 }
+
 static void NextFrame(void)
 {
     frame++;
     if (frame >= num_frames)
         frame = num_frames - 1;
 }
+
 static void YawUp(void)
 {
     camera_yaw += 1.0f;
     if (camera_yaw > 90.0f)
         camera_yaw = 90.0f;
 }
+
 static void YawDown(void)
 {
     camera_yaw -= 1.0f;
     if (camera_yaw < -90.0f)
         camera_yaw = -90.0f;
 }
+
 static void AngleRight(void)
 {
     camera_angle -= 1.0f;
     if (camera_angle < -180.0f)
         camera_angle += 360.0f;
 }
+
 static void AngleLeft(void)
 {
     camera_angle += 1.0f;
     if (camera_angle > 180.0f)
         camera_angle -= 360.0f;
 }
+
 void InitKeyboard(void)
 {
     auxKeyFunc(AUX_q, (AUXKEYPROC)DistUp);
@@ -163,6 +172,7 @@ static void Init(void)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 }
+
 static void CALLBACK Reshape(unsigned width,unsigned height)
 {
     glViewport(0, 0, width, height);
@@ -171,6 +181,7 @@ static void CALLBACK Reshape(unsigned width,unsigned height)
     camera_half_width = (float)width / (float)height * radius * zbuffer_min / camera_dist;
     camera_half_height = radius * zbuffer_min / camera_dist;
 }
+
 void main(int carg, char **varg)
 {
     if (carg != 2)

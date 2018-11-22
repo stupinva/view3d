@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 /*
 // Для суммы цветов точек используются числа с фиксированной запятой в формате 24.8
 unsigned MAX_FRACTION = 0xFF;
@@ -10,6 +11,7 @@ struct dst2src
     unsigned f0;
     unsigned f1;
 };
+
 void min_max_round(float x, dst2src *d2s)
 {
     d2s->u = (unsigned)x;
@@ -26,6 +28,7 @@ bool ScaleRGBWidth(unsigned src_width, unsigned height, RGB *src_pixels,
         fprintf(stderr, "Could not get memory for resizing image.\n");
         return false;
     }
+
     if ((*dst_pixels = (RGB *)malloc(height * dst_width * sizeof(RGB))) == NULL)
     {
         free(dst2src_x);
@@ -53,8 +56,10 @@ bool ScaleRGBWidth(unsigned src_width, unsigned height, RGB *src_pixels,
         
             red += (unsigned)src_pixels[adr_dst_y + ux0].red * fx0 +
                 (unsigned)src_pixels[adr_dst_y + ux1].red * fx1;
+
             green += (unsigned)src_pixels[adr_dst_y + ux0].green * fx0 +
                 (unsigned)src_pixels[adr_dst_y + ux1].green * fx1;
+
             blue += (unsigned)src_pixels[adr_dst_y + ux0].blue * fx0+
                 (unsigned)src_pixels[adr_dst_y + ux1].blue * fx1;
 
@@ -72,6 +77,7 @@ bool ScaleRGBWidth(unsigned src_width, unsigned height, RGB *src_pixels,
             (*dst_pixels)[adr_dst_y + dst_x].green = (unsigned char)(green / denom);
             (*dst_pixels)[adr_dst_y + dst_x].blue = (unsigned char)(blue / denom);
         }
+
     free(dst2src_x);
     return true;
 }

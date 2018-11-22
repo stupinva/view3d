@@ -13,10 +13,12 @@ Model::Model(void)
     num_frames = 0;
     num_vertices = 0;
 }
+
 Model::~Model(void)
 {
     FreeModel();
 }
+
 void Model::FreeModel(void)
 {
     if (num_points)
@@ -24,16 +26,19 @@ void Model::FreeModel(void)
         free(points);
         num_points = 0;
     }
+
     if (num_meshes)
     {
         free(meshes);
         num_meshes = 0;
     }
+
     if (num_triangles)
     {
         free(triangles);
         num_triangles = 0;
     }
+
     if (num_frames)
     {
         free(frame_names);
@@ -44,6 +49,7 @@ void Model::FreeModel(void)
         num_vertices = 0;
     }
 }
+
 bool Model::NewModel(unsigned arg_num_skins,
                      unsigned arg_num_points,
                      unsigned arg_num_meshes,
@@ -54,12 +60,14 @@ bool Model::NewModel(unsigned arg_num_skins,
 {
     // Удаляем уже загруженную модель, если она есть
     FreeModel();
+
     // Выделяем память под имена текстур
     if ((skin_indexes = (unsigned *)malloc(arg_num_skins * sizeof(*skin_indexes))) == NULL)
     {
         fprintf(stderr, "Could not get memory for skin names.\n");
         return false;
     }
+
     // Выделяем память под точки - координаты вершин на текстуре
     if ((points = (Vector2D *)malloc(arg_num_points * sizeof(*points))) == NULL)
     {
@@ -67,6 +75,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr, "Could not get memory for points.\n");
         return false;
     }
+
     // Выделяем память под группы треугольников
     if ((meshes = (Mesh *)malloc(arg_num_meshes * sizeof(*meshes))) == NULL)
     {
@@ -75,6 +84,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr, "Could not get memory for meshes.\n");
         return false;
     }
+
     // Выделяем память под треугольники
     if ((triangles = (Triangle *)malloc(arg_num_triangles * sizeof(*triangles))) == NULL)
     {
@@ -84,6 +94,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr, "Could not get memory for triangles.\n");
         return false;
     }
+
     // Выделяем память под кадры:
     // Выделяем память под имена кадров
     if ((frame_names = (ModelName *)malloc(arg_num_frames * sizeof(*frame_names))) == NULL)
@@ -95,6 +106,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr, "Could not get memory for frame names.\n");
         return false;
     }
+
     // Выделяем память под координаты вершин
     if ((vertex_positions = (Vector3D *)malloc(arg_num_frames * arg_num_vertices *
             sizeof(*vertex_positions))) == NULL)
@@ -107,6 +119,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr, "Could not get memory for vertex positions.\n");
         return false;
     }
+
     // Выделяем память под нормали к вершинам
     if ((vertex_normals = (Vector3D *)malloc(arg_num_frames * arg_num_vertices *
             sizeof(*vertex_normals))) == NULL)
@@ -120,6 +133,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr, "Could not get memory for vertex normals.\n");
         return false;
     }
+
     // Выделяем память под нормали к треугольникам
     if ((triangle_normals = (Vector3D *)malloc(arg_num_frames * arg_num_triangles *
             sizeof(*triangle_normals))) == NULL)
@@ -134,6 +148,7 @@ bool Model::NewModel(unsigned arg_num_skins,
         fprintf(stderr,"Could not get memory for triangle normals.\n");
         return false;
     }
+
     // Наконец-то память подо все массивы успешно выделена, запоминаем новое состояноие модели
     num_skins = arg_num_skins;
     num_points = arg_num_points;
@@ -143,10 +158,12 @@ bool Model::NewModel(unsigned arg_num_skins,
     num_vertices = arg_num_vertices;
     return true;
 }
+
 bool Model::CalculateNormals(void)
 {
     if (!num_triangles || !num_frames || !num_vertices)
         return false;
+
     unsigned *vertex_normal_denominators;
     if ((vertex_normal_denominators = (unsigned *)malloc(num_vertices *
         sizeof(*vertex_normal_denominators))) == NULL)
@@ -154,11 +171,13 @@ bool Model::CalculateNormals(void)
         fprintf(stderr, "Could not calculate normals.\n");
         return false;
     }
+
     for(unsigned i = 0; i < num_frames; i++)
     {
         Vector3D *frame_vertex_positions = &vertex_positions[i * num_vertices];
         Vector3D *frame_vertex_normals = &vertex_normals[i * num_vertices];
         Vector3D *frame_triangle_normals = &triangle_normals[i * num_triangles];
+
         // Обнуляем нормали к вершинам текущего кадра и делитель
         for(unsigned j = 0; j < num_vertices; j++)
         {
@@ -167,11 +186,13 @@ bool Model::CalculateNormals(void)
             frame_vertex_normals[j][2] = 0.0f;
             vertex_normal_denominators[j] = 0;
         }
+
         for(unsigned j = 0; j < num_triangles; j++)
         {
             unsigned vertex_indexes[3];
             for(unsigned k = 0; k < 3; k++)
                 vertex_indexes[k] = triangles[j].vertex_indexes[k];
+
             // Вычисляем нормали к треугольникам текущего кадра
             Vector3D u;
             VectorSub
@@ -191,6 +212,7 @@ bool Model::CalculateNormals(void)
             CrossProduct(u, v, triangle_normal);
             VectorNormalize(triangle_normal, triangle_normal);
             VectorCopy(triangle_normal, frame_triangle_normals[j]);
+
             // Добавляем к нормалям вершин, принадлежащих текущему треугольнику его нормаль
             for(unsigned k = 0; k < 3; k++)
             {
@@ -203,6 +225,7 @@ bool Model::CalculateNormals(void)
                 vertex_normal_denominators[vertex_indexes[k]]++;
             }
         }
+
         // Вычисляем норамли к вершинам текущего кадра
         for(unsigned j = 0; j < num_vertices; j++)
             VectorScale
@@ -222,36 +245,42 @@ void VectorCopy(Vector3D a, Vector3D ans)
     ans[1] = a[1];
     ans[2] = a[2];
 }
+
 void CrossProduct(Vector3D a, Vector3D b, Vector3D ans)
 {
     ans[0] = a[1] * b[2] - a[2] * b[1];
     ans[1] = a[2] * b[0] - a[0] * b[2];
     ans[2] = a[0] * b[1] - a[1] * b[0];
 }
+
 void VectorSub(Vector3D a, Vector3D b, Vector3D ans)
 {
     ans[0] = a[0] - b[0];
     ans[1] = a[1] - b[1];
     ans[2] = a[2] - b[2];
 }
+
 void VectorAdd(Vector3D a, Vector3D b, Vector3D ans)
 {
     ans[0] = a[0] + b[0];
     ans[1] = a[1] + b[1];
     ans[2] = a[2] + b[2];
 }
+
 void VectorScale(Vector3D a, float f, Vector3D ans)
 {
     ans[0] = a[0] * f;
     ans[1] = a[1] * f;
     ans[2] = a[2] * f;
 }
+
 float VectorLength(Vector3D v)
 {
     float length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
     length = (float)sqrt(length);
     return length;
 }
+
 const float DELTA = 0.00001f;
 void VectorNormalize(Vector3D a, Vector3D ans)
 {
@@ -295,6 +324,7 @@ float Model::GetBoundRadius(void)
         }
         float min_length = VectorLength(min);
         float max_length = VectorLength(max);
+
         if (max_length > min_length)
             return max_length;
         else
@@ -307,16 +337,20 @@ unsigned Model::GetNumFrames(void)
 {
     return num_frames;
 }
+
 /*
 void Model::DumpModel(void)
 {
     fprintf(stdout, "--- model ---\n%s\n", name);
+
     fprintf(stdout, "--- skins ---\n");
     for(unsigned i = 0; i < num_skins; i++)
         fprintf(stdout, "%s\n", skin_names[i]);
+
     fprintf(stdout, "--- meshes ---\n");
     for(i = 0; i < num_meshes; i++)
         fprintf(stdout, "%s\n", meshes[i].name);
+
     fprintf(stdout, "--- frames ---\n");
     for(i = 0; i < num_frames; i++)
         fprintf(stdout, "%s\n", frame_names[i]);
