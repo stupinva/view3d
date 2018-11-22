@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 #include "model.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -10,50 +11,50 @@
 #pragma pack(push,1)
 struct IDP2Header
 {
-    char ident[4];               // Идентификатор, должен быть "IDP2"
-    unsigned long version;       // Версия 8
+    uint8_t ident[4];       // Идентификатор, должен быть "IDP2"
+    uint32_t version;       // Версия 8
 
-    unsigned long skin_width;    // Ширина текстуры
-    unsigned long skin_height;   // Высота текстуры
-    unsigned long frame_size;    // Размер кадра в байтах
+    uint32_t skin_width;    // Ширина текстуры
+    uint32_t skin_height;   // Высота текстуры
+    uint32_t frame_size;    // Размер кадра в байтах
 
-    unsigned long num_skins;     // Количество текстур
-    unsigned long num_vertices;  // Количество вершин
-    unsigned long num_points;    // Количество точек на текстуре
-    unsigned long num_triangles; // Количество треугольников
-    unsigned long num_glcmds;    // Количество двойных слов в списке команд полос/вееров
-    unsigned long num_frames;    // Количество кадров
+    uint32_t num_skins;     // Количество текстур
+    uint32_t num_vertices;  // Количество вершин
+    uint32_t num_points;    // Количество точек на текстуре
+    uint32_t num_triangles; // Количество треугольников
+    uint32_t num_glcmds;    // Количество двойных слов в списке команд полос/вееров
+    uint32_t num_frames;    // Количество кадров
 
-    unsigned long ofs_skins;     // Смещение текстур - строк из 64 символов
-    unsigned long ofs_points;    // Смещение массива точек в файле (в байтах)
-    unsigned long ofs_triangles; // Смещение треугольников
-    unsigned long ofs_frames;    // Смещение первого кадра
-    unsigned long ofs_glcmds;    // Смещение списка команд полос/вееров
-    unsigned long ofs_end;       // Конец файла
+    uint32_t ofs_skins;     // Смещение текстур - строк из 64 символов
+    uint32_t ofs_points;    // Смещение массива точек в файле (в байтах)
+    uint32_t ofs_triangles; // Смещение треугольников
+    uint32_t ofs_frames;    // Смещение первого кадра
+    uint32_t ofs_glcmds;    // Смещение списка команд полос/вееров
+    uint32_t ofs_end;       // Конец файла
 };
 #pragma pack(pop)
 
 #pragma pack(push,1)
 struct IDP2Point
 {
-    unsigned short s;
-    unsigned short t;
+    uint16_t s;
+    uint16_t t;
 };
 #pragma pack(pop)
 
 #pragma pack(push,1)
 struct IDP2Triangle
 {
-    unsigned short vertex_indexes[3];
-    unsigned short point_indexes[3];
+    uint16_t vertex_indexes[3];
+    uint16_t point_indexes[3];
 };
 #pragma pack(pop)
 
 #pragma pack(push,1)
 struct IDP2Vertex
 {
-    unsigned char packed_xyz[3];
-    unsigned char light_normal_index;
+    uint8_t packed_xyz[3];
+    uint8_t light_normal_index;
 };
 #pragma pack(pop)
 
