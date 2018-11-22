@@ -3,7 +3,6 @@
 #include <GL/glu.h>
 #include <GL/glaux.h>
 #include <stdio.h>
-#include "texture.h"
 #include "model.h"
 
 #pragma warning(disable:4244)
