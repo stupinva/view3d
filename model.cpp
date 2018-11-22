@@ -162,7 +162,9 @@ bool Model::NewModel(unsigned arg_num_skins,
 bool Model::CalculateNormals(void)
 {
     if (!num_triangles || !num_frames || !num_vertices)
+    {
         return false;
+    }
 
     unsigned *vertex_normal_denominators;
     if ((vertex_normal_denominators = (unsigned *)malloc(num_vertices *
@@ -191,7 +193,9 @@ bool Model::CalculateNormals(void)
         {
             unsigned vertex_indexes[3];
             for(unsigned k = 0; k < 3; k++)
+            {
                 vertex_indexes[k] = triangles[j].vertex_indexes[k];
+            }
 
             // Вычисляем нормали к треугольникам текущего кадра
             Vector3D u;
@@ -228,12 +232,14 @@ bool Model::CalculateNormals(void)
 
         // Вычисляем норамли к вершинам текущего кадра
         for(unsigned j = 0; j < num_vertices; j++)
+        {
             VectorScale
             (
                 frame_vertex_normals[j],
                 1.0f / (float)vertex_normal_denominators[j],
                 frame_vertex_normals[j]
             );
+        }
     }
     free(vertex_normal_denominators);
     return true;
@@ -287,7 +293,9 @@ void VectorNormalize(Vector3D a, Vector3D ans)
     float length = a[0] * a[0] + a[1] * a[1] + a[2] * a[2];
     length = (float)sqrt(length);
     if (length < DELTA)
+    {
         return;
+    }
     ans[0] = a[0] / length;
     ans[1] = a[1] / length;
     ans[2] = a[2] / length;
@@ -304,31 +312,46 @@ float Model::GetBoundRadius(void)
         for(unsigned i = 1; i < num_frames * num_vertices; i++)
         {
             if (min[0] > vertex_positions[i][0])
+            {
                 min[0] = vertex_positions[i][0];
+            }
 
             if (min[1] > vertex_positions[i][1])
+            {
                 min[1] = vertex_positions[i][1];
+            }
 
             if (min[2] > vertex_positions[i][2])
+            {
                 min[2] = vertex_positions[i][2];
+            }
             
             if (max[0] < vertex_positions[i][0])
+            {
                 max[0] = vertex_positions[i][0];
+            }
 
             if (max[1] < vertex_positions[i][1])
+            {
                 max[1] = vertex_positions[i][1];
+            }
 
             if (max[2] < vertex_positions[i][2])
+            {
                 max[2] = vertex_positions[i][2];
-
+            }
         }
         float min_length = VectorLength(min);
         float max_length = VectorLength(max);
 
         if (max_length > min_length)
+        {
             return max_length;
+        }
         else
+        {
             return min_length;
+        }
     }
     return 0.0f;
 }
@@ -345,14 +368,20 @@ void Model::DumpModel(void)
 
     fprintf(stdout, "--- skins ---\n");
     for(unsigned i = 0; i < num_skins; i++)
+    {
         fprintf(stdout, "%s\n", skin_names[i]);
+    }
 
     fprintf(stdout, "--- meshes ---\n");
     for(i = 0; i < num_meshes; i++)
+    {
         fprintf(stdout, "%s\n", meshes[i].name);
+    }
 
     fprintf(stdout, "--- frames ---\n");
     for(i = 0; i < num_frames; i++)
+    {
         fprintf(stdout, "%s\n", frame_names[i]);
+    }
 }
 */

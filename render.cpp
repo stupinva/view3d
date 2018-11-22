@@ -18,7 +18,9 @@ void Model::DrawModel(unsigned lighting, unsigned frame)
                 for(i = 0; i < num_triangles; i++)
                 {
                     for(unsigned j = 0; j < 3; j++)
+                    {
                         glVertex3fv(frame_vertex_positions[triangles[i].vertex_indexes[j]]);
+                    }
                 }
                 break;
 
@@ -27,7 +29,9 @@ void Model::DrawModel(unsigned lighting, unsigned frame)
                 {
                     glNormal3fv(frame_triangle_normals[i]);
                     for(unsigned j = 0; j < 3; j++)
+                    {
                         glVertex3fv(frame_vertex_positions[triangles[i].vertex_indexes[j]]);
+                    }
                 }
                 break;
 

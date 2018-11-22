@@ -88,7 +88,9 @@ bool loadLinePCX(FILE *file, unsigned char *line_buffer, unsigned bytes_per_line
             }
         }
         else
+        {
             line_buffer[j++] = byte;
+        }
     }
     return true;
 }
@@ -126,8 +128,10 @@ bool Texture::LoadPCXTexture(const char *file_name)
     }
 
     for(int pcx_type = 0; pcx_type < PCX_NUM_TYPES; pcx_type++)
+    {
         if ((pcx_header.bits_per_plane == pcx_bits_per_plane[pcx_type]) &&
             (pcx_header.num_planes == pcx_num_planes[pcx_type]))
+        {
             switch (pcx_type)
             {
                 unsigned char *line_buffer;
@@ -192,6 +196,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                     }
 
                     if ((byte == 0x0C) || (byte == 0x0A))
+                    {
                         for(j = 0; j < 256; j++)
                         {
                             int red, green, blue;
@@ -214,6 +219,7 @@ bool Texture::LoadPCXTexture(const char *file_name)
                             fprintf(stderr, "Unexpected end of PCX-file.\n");
                             return false;
                         }
+                    }
                     else
                     {
                         free(data);
@@ -223,18 +229,22 @@ bool Texture::LoadPCXTexture(const char *file_name)
                     }
 
                     if (byte == 0xC0)
+                    {
                         for(j = 0; j < 256; j++)
                         {
                             ((RGB *)data)[j].red = scale63to255[((RGB *)data)[j].red];
                             ((RGB *)data)[j].green = scale63to255[((RGB *)data)[j].green];
                             ((RGB *)data)[j].blue = scale63to255[((RGB *)data)[j].blue];
                         }
+                    }
                     fclose(file);
 
                     type = TEXTURE_INDEX_RGB;
                     strcpy(name, file_name);
                     return true;
             }
+        }
+    }
     fprintf(stderr, "File \"%s\" - not a PCX-file.\n", file_name);
     return false;
 }

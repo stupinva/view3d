@@ -79,7 +79,9 @@ static void CALLBACK Draw(void)
         glEnable(GL_LIGHT1);
     }
     else
+    {
         glDisable(GL_LIGHTING);
+    }
     model.DrawModel(lighting, frame);
 
     glFinish();
@@ -90,63 +92,81 @@ static void SwitchLighting(void)
 {
     lighting++;
     if (lighting > 2)
+    {
         lighting = 0;
+    }
 }
 
 static void DistUp(void)
 {
     camera_dist -= 1.0f;
     if (camera_dist < zbuffer_min)
+    {
         camera_dist = zbuffer_min;
+    }
 }
 
 static void DistDown(void)
 {
     camera_dist += 1.0f;
     if (camera_dist > zbuffer_max)
+    {
         camera_dist = zbuffer_max;
+    }
 }
 
 static void PrevFrame(void)
 {
     frame--;
     if ((int)frame < 0)
+    {
         frame = 0;
+    }
 }
 
 static void NextFrame(void)
 {
     frame++;
     if (frame >= num_frames)
+    {
         frame = num_frames - 1;
+    }
 }
 
 static void YawUp(void)
 {
     camera_yaw += 1.0f;
     if (camera_yaw > 90.0f)
+    {
         camera_yaw = 90.0f;
+    }
 }
 
 static void YawDown(void)
 {
     camera_yaw -= 1.0f;
     if (camera_yaw < -90.0f)
+    {
         camera_yaw = -90.0f;
+    }
 }
 
 static void AngleRight(void)
 {
     camera_angle -= 1.0f;
     if (camera_angle < -180.0f)
+    {
         camera_angle += 360.0f;
+    }
 }
 
 static void AngleLeft(void)
 {
     camera_angle += 1.0f;
     if (camera_angle > 180.0f)
+    {
         camera_angle -= 360.0f;
+    }
 }
 
 void InitKeyboard(void)

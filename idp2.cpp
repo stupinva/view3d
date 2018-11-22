@@ -209,11 +209,15 @@ bool Model::LoadIDP2Model(const char *file_name)
 
             /*Vector3D *frame_vertex_position = &frame_vertex_positions[j];
             for(unsigned k = 0; k < 3; k++)
+            {
                 frame_vertex_position[k] = frame_header.scale[k] * vertex[k] + frame_header.translate[k];
+            }
             */
             for(unsigned k = 0; k < 3; k++)
+            {
                 frame_vertex_positions[j][k] = frame_header.scale[k] * (float)vertex.packed_xyz[k]
                     + frame_header.translate[k];
+            }
         }
     }
     fclose(file);
@@ -222,9 +226,13 @@ bool Model::LoadIDP2Model(const char *file_name)
     // Теперь можно посчитать нормали, проверить модель, хлебнуть пивка или ещё что-нибудь...
     fprintf(stderr, "Calculating normals.\r");;
     if (CalculateNormals())
+    {
         fprintf(stdout, "Normals calculated. \n");
+    }
     else
+    {
         FreeModel();
+    }
 
     fprintf(stdout, "Memory usage:\n"
                     "%d\tskins\t\t%lu\n"

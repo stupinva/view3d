@@ -47,9 +47,13 @@ bool Texture::ConvertTexture(void)
         src_pixels = (unsigned char *)data + 256 * sizeof(RGB);
     }
     else if (type == TEXTURE_RGB)
+    {
         return true;
+    }
     else
+    {
         return false;
+    }
 
     if ((dst_pixels = (RGB *)malloc(width * height * sizeof(*dst_pixels))) == NULL)
     {
@@ -58,7 +62,9 @@ bool Texture::ConvertTexture(void)
     }
 
     for(unsigned i = 0; i < width * height; i++)
+    {
         dst_pixels[i] = src_palette[src_pixels[i]];
+    }
 
     free(data);
     data = dst_pixels;
@@ -71,7 +77,9 @@ bool Texture::DrawTexture(void)
 {
 
     if (type != TEXTURE_RGB)
+    {
         ConvertTexture();
+    }
 
     if (type == TEXTURE_RGB)
     {

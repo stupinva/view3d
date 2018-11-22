@@ -39,9 +39,12 @@ bool ScaleRGBWidth(unsigned src_width, unsigned height, RGB *src_pixels,
     float x_scale = (float)src_width / (float)dst_width;
 
     for(unsigned dst_x = 0; dst_x < dst_width + 1; dst_x++)
+    {
         min_max_round(x_scale * dst_x, &(dst2src_x[dst_x]));
+    }
 
     for(unsigned adr_y = 0; adr_y < height * dst_width; ard_y += dst_width)
+    {
         for(unsigned dst_x = 0; dst_x < dst_width; dst_x++)
         {
             unsigned red = 0;
@@ -77,6 +80,7 @@ bool ScaleRGBWidth(unsigned src_width, unsigned height, RGB *src_pixels,
             (*dst_pixels)[adr_dst_y + dst_x].green = (unsigned char)(green / denom);
             (*dst_pixels)[adr_dst_y + dst_x].blue = (unsigned char)(blue / denom);
         }
+    }
 
     free(dst2src_x);
     return true;
