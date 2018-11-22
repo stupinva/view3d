@@ -102,14 +102,12 @@ bool Model::LoadIDP2Model(const char *file_name)
     }
 
     // Выделяем память подо все массивы модели
-    if (!NewModel(header.num_skins, header.num_points, 1, header.num_triangles, header.num_frames,
-            header.num_vertices))
+    if (!NewModel(header.num_skins, header.num_points, 1,
+                  header.num_triangles, header.num_frames, header.num_vertices))
     {
         fclose(file);
         return false;
     }
-
-    ExtractName(file_name, name);
 
     // Грузим текстуры модели
     fseek(file, header.ofs_skins, SEEK_SET);
@@ -125,12 +123,14 @@ bool Model::LoadIDP2Model(const char *file_name)
             return false;
         }
 
-        /*if ((skin_indexes = LoadTexture(skin_name)) == -1)
+        /*
+        if ((skin_indexes = LoadTexture(skin_name)) == -1)
         {
             FreeModel();
             fclose(file);
             return false;
-        }*/
+        }
+        */
     }
     fprintf(stdout, "%d skins loaded.\n", num_skins);
 
@@ -155,6 +155,7 @@ bool Model::LoadIDP2Model(const char *file_name)
     fprintf(stdout, "%d points loaded.\n", num_points);
 
     // Грузим треугольники
+    ExtractName(file_name, name);
     strcpy(meshes[0].name, name);
     meshes[0].first_skin = 0;
     meshes[0].num_skins = num_skins;
@@ -207,12 +208,14 @@ bool Model::LoadIDP2Model(const char *file_name)
                 return false;
             }
 
-            /*Vector3D *frame_vertex_position = &frame_vertex_positions[j];
+            /*
+            Vector3D *frame_vertex_position = &frame_vertex_positions[j];
             for(unsigned k = 0; k < 3; k++)
             {
                 frame_vertex_position[k] = frame_header.scale[k] * vertex[k] + frame_header.translate[k];
             }
             */
+
             for(unsigned k = 0; k < 3; k++)
             {
                 frame_vertex_positions[j][k] = frame_header.scale[k] * (float)vertex.packed_xyz[k]
@@ -245,7 +248,7 @@ bool Model::LoadIDP2Model(const char *file_name)
                     num_meshes, num_meshes * sizeof(*meshes),
                     num_triangles, num_triangles * sizeof(*triangles),
                     num_frames, num_frames * (num_triangles * sizeof(*triangle_normals) +
-                        num_vertices * (sizeof(*vertex_positions) + sizeof(*vertex_normals))));
+                                num_vertices * (sizeof(*vertex_positions) + sizeof(*vertex_normals))));
     //DumpModel();
     return true;
 }

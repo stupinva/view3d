@@ -42,15 +42,6 @@ const int PCX_NUM_TYPES = 6;
 const unsigned char pcx_bits_per_plane[PCX_NUM_TYPES] = {1, 2, 1, 1, 8, 8};
 const unsigned char pcx_num_planes[PCX_NUM_TYPES] = {1, 1, 3, 4, 1, 3};
 
-// Таблица для масштабирования 6-битных элементов палитры в 8-битные
-const unsigned char scale63to255[] =
-{
-    0x00, 0x04, 0x08, 0x0C, 0x10, 0x14, 0x18, 0x1C, 0x20, 0x24, 0x28, 0x2D, 0x31, 0x35, 0x39, 0x3D,
-    0x41, 0x45, 0x49, 0x4D, 0x51, 0x55, 0x59, 0x5D, 0x61, 0x65, 0x69, 0x6D, 0x71, 0x75, 0x79, 0x7D,
-    0x82, 0x86, 0x8A, 0x8E, 0x92, 0x96, 0x9A, 0x9E, 0xA2, 0xA6, 0xAA, 0xAE, 0xB2, 0xB6, 0xBA, 0xBE,
-    0xC2, 0xC6, 0xCA, 0xCE, 0xD2, 0xD7, 0xDB, 0xDF, 0xE3, 0xE7, 0xEB, 0xEF, 0xF3, 0xF7, 0xFB, 0xFF
-};
-
 // Процедура для декодирования и загрузки строки в буфер из файла
 bool loadLinePCX(FILE *file, unsigned char *line_buffer, unsigned bytes_per_line)
 {
@@ -203,9 +194,11 @@ bool Texture::LoadPCXTexture(const char *file_name)
                             if ((red = fgetc(file)) != EOF)
                             {
                                 ((RGB *)data)[j].red = (unsigned char)red;
+
                                 if ((green = fgetc(file)) != EOF)
                                 {
                                     ((RGB *)data)[j].green = (unsigned char)green;
+
                                     if ((blue = fgetc(file)) != EOF)
                                     {
                                         ((RGB *)data)[j].blue = (unsigned char)blue;
@@ -232,9 +225,9 @@ bool Texture::LoadPCXTexture(const char *file_name)
                     {
                         for(j = 0; j < 256; j++)
                         {
-                            ((RGB *)data)[j].red = scale63to255[((RGB *)data)[j].red];
-                            ((RGB *)data)[j].green = scale63to255[((RGB *)data)[j].green];
-                            ((RGB *)data)[j].blue = scale63to255[((RGB *)data)[j].blue];
+                            ((RGB *)data)[j].red = 255 * ((RGB *)data)[j].red / 63 ;
+                            ((RGB *)data)[j].green = 255 * ((RGB *)data)[j].green / 63;
+                            ((RGB *)data)[j].blue = 255 * ((RGB *)data)[j].blue / 63;
                         }
                     }
                     fclose(file);

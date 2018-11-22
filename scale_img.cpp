@@ -63,7 +63,7 @@ bool ScaleRGBWidth(unsigned src_width, unsigned height, RGB *src_pixels,
             green += (unsigned)src_pixels[adr_dst_y + ux0].green * fx0 +
                 (unsigned)src_pixels[adr_dst_y + ux1].green * fx1;
 
-            blue += (unsigned)src_pixels[adr_dst_y + ux0].blue * fx0+
+            blue += (unsigned)src_pixels[adr_dst_y + ux0].blue * fx0 +
                 (unsigned)src_pixels[adr_dst_y + ux1].blue * fx1;
 
             denom += fx0 + fx1;

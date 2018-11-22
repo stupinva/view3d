@@ -63,8 +63,7 @@ public:
                   unsigned arg_num_meshes,
                   unsigned arg_num_triangles,
                   unsigned arg_num_frames,
-                  unsigned arg_num_vertices
-                 );
+                  unsigned arg_num_vertices);
     void FreeModel(void);
     bool LoadIDP2Model(const char *file_name);
     bool CalculateNormals(void);

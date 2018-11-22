@@ -55,8 +55,7 @@ bool Model::NewModel(unsigned arg_num_skins,
                      unsigned arg_num_meshes,
                      unsigned arg_num_triangles,
                      unsigned arg_num_frames,
-                     unsigned arg_num_vertices
-                    )
+                     unsigned arg_num_vertices)
 {
     // Удаляем уже загруженную модель, если она есть
     FreeModel();
@@ -161,7 +160,7 @@ bool Model::NewModel(unsigned arg_num_skins,
 
 bool Model::CalculateNormals(void)
 {
-    if (!num_triangles || !num_frames || !num_vertices)
+    if ((num_triangles == 0) || (num_frames == 0) || (num_vertices == 0))
     {
         return false;
     }

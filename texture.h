@@ -16,16 +16,19 @@ struct RGB
 };
 #endif
 
-const unsigned TEXTURE_NOT_LOADED = 0;
-const unsigned TEXTURE_QUAKE = 1;
-const unsigned TEXTURE_QUAKE2 = 2;
-const unsigned TEXTURE_INDEX_RGB = 3;
-const unsigned TEXTURE_RGB = 4;
+typedef enum texture_type_e
+{
+    TEXTURE_NOT_LOADED,
+    TEXTURE_QUAKE,
+    TEXTURE_QUAKE2,
+    TEXTURE_INDEX_RGB,
+    TEXTURE_RGB
+} texture_type_t;
 
 struct Texture
 {
     char name[128];
-    unsigned type;
+    texture_type_t type;
     unsigned width;
     unsigned height;
     unsigned num_levels;

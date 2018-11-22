@@ -16,7 +16,7 @@ unsigned num_frames = 0;
 float radius;
 
 float zbuffer_min = ZBUFFER_MIN;
-float zbuffer_max = zbuffer_min+2.0f*radius;
+float zbuffer_max = zbuffer_min + 2.0f * radius;
 
 float camera_half_width = 4.0f;
 float camera_half_height = 4.0f;
@@ -25,6 +25,7 @@ float camera_angle = 0.0f;
 float camera_dist = radius;
 
 Model model;
+
 static void CALLBACK Draw(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -33,7 +34,8 @@ static void CALLBACK Draw(void)
     glLoadIdentity();
     
     glFrustum(-camera_half_width, camera_half_width,
-        -camera_half_height, camera_half_height, zbuffer_min, zbuffer_max);
+              -camera_half_height, camera_half_height,
+              zbuffer_min, zbuffer_max);
     glTranslatef(0.0f, 0.0f, -camera_dist);
     glRotatef(camera_yaw, 1.0f, 0.0f, 0.0f);
     glRotatef(90.0f - camera_angle, 0.0f, 1.0f, 0.0f);
@@ -231,7 +233,9 @@ void main(int carg, char **varg)
         return;
     }
     if (!model.LoadIDP2Model(varg[1]))
+    {
         return;
+    }
         
     num_frames = model.GetNumFrames();
     radius = model.GetBoundRadius();
@@ -242,7 +246,9 @@ void main(int carg, char **varg)
     auxInitPosition(0, 0, 800, 600);
     auxInitDisplayMode(AUX_RGB | AUX_DOUBLE);
     if (auxInitWindow("view3d") == GL_FALSE)
+    {
         auxQuit();
+    }
     Init();
     auxReshapeFunc((AUXRESHAPEPROC)Reshape);
     auxMainLoop(Draw);
