@@ -32,25 +32,33 @@ struct IDP2Header
     unsigned long ofs_glcmds;    // Смещение списка команд полос/вееров
     unsigned long ofs_end;       // Конец файла
 };
+#pragma pack(pop)
 
+#pragma pack(push,1)
 struct IDP2Point
 {
     unsigned short s;
     unsigned short t;
 };
+#pragma pack(pop)
 
+#pragma pack(push,1)
 struct IDP2Triangle
 {
     unsigned short vertex_indexes[3];
     unsigned short point_indexes[3];
 };
+#pragma pack(pop)
 
+#pragma pack(push,1)
 struct IDP2Vertex
 {
     unsigned char packed_xyz[3];
     unsigned char light_normal_index;
 };
+#pragma pack(pop)
 
+#pragma pack(push,1)
 struct IDP2FrameHeader
 {
     Vector3D scale;     // Каждую координату упакованной вершины нужно
