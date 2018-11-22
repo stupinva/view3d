@@ -9,25 +9,29 @@
 
 const float ZBUFFER_MIN = 10.0f;
 
-unsigned lighting = 2;
-unsigned frame = 0;
-unsigned num_frames = 0;
+unsigned lighting;
+unsigned frame;
+unsigned num_frames;
 float radius;
 
-float zbuffer_min = ZBUFFER_MIN;
-float zbuffer_max = zbuffer_min + 2.0f * radius;
+float zbuffer_min;
+float zbuffer_max;
 
-float camera_half_width = 4.0f;
-float camera_half_height = 4.0f;
-float camera_yaw = 0.0f;
-float camera_angle = 0.0f;
-float camera_dist = radius;
+float camera_half_width;
+float camera_half_height;
+float camera_yaw;
+float camera_angle;
+float camera_dist;
 
 Model model;
 
-static void CALLBACK Draw(void)
+void Draw(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glClearDepth(zbuffer_min);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -86,10 +90,9 @@ static void CALLBACK Draw(void)
     model.DrawModel(lighting, frame);
 
     glFinish();
-    auxSwapBuffers();
 }
 
-static void SwitchLighting(void)
+void SwitchLighting(void)
 {
     lighting++;
     if (lighting > 2)
@@ -98,7 +101,7 @@ static void SwitchLighting(void)
     }
 }
 
-static void DistUp(void)
+void DistUp(void)
 {
     camera_dist -= 1.0f;
     if (camera_dist < zbuffer_min)
@@ -107,7 +110,7 @@ static void DistUp(void)
     }
 }
 
-static void DistDown(void)
+void DistDown(void)
 {
     camera_dist += 1.0f;
     if (camera_dist > zbuffer_max)
@@ -116,7 +119,7 @@ static void DistDown(void)
     }
 }
 
-static void PrevFrame(void)
+void PrevFrame(void)
 {
     frame--;
     if ((int)frame < 0)
@@ -125,7 +128,7 @@ static void PrevFrame(void)
     }
 }
 
-static void NextFrame(void)
+void NextFrame(void)
 {
     frame++;
     if (frame >= num_frames)
@@ -134,7 +137,7 @@ static void NextFrame(void)
     }
 }
 
-static void YawUp(void)
+void YawUp(void)
 {
     camera_yaw += 1.0f;
     if (camera_yaw > 90.0f)
@@ -143,7 +146,7 @@ static void YawUp(void)
     }
 }
 
-static void YawDown(void)
+void YawDown(void)
 {
     camera_yaw -= 1.0f;
     if (camera_yaw < -90.0f)
@@ -152,7 +155,7 @@ static void YawDown(void)
     }
 }
 
-static void AngleRight(void)
+void AngleRight(void)
 {
     camera_angle -= 1.0f;
     if (camera_angle < -180.0f)
@@ -161,7 +164,7 @@ static void AngleRight(void)
     }
 }
 
-static void AngleLeft(void)
+void AngleLeft(void)
 {
     camera_angle += 1.0f;
     if (camera_angle > 180.0f)
@@ -170,37 +173,49 @@ static void AngleLeft(void)
     }
 }
 
-void InitKeyboard(void)
+int Init(const char *filename)
 {
-    auxKeyFunc(AUX_q, (AUXKEYPROC)DistUp);
-    auxKeyFunc(AUX_a, (AUXKEYPROC)DistDown);
-    auxKeyFunc(AUX_z, (AUXKEYPROC)PrevFrame);
-    auxKeyFunc(AUX_x, (AUXKEYPROC)NextFrame);
+    if (!model.LoadIDP2Model(filename))
+    {
+        return -1;
+    }
+        
+    lighting = 2;
+    frame = 0;
 
-    auxKeyFunc(AUX_l, (AUXKEYPROC)SwitchLighting);
+    num_frames = model.GetNumFrames();
+    radius = model.GetBoundRadius();
 
-    auxKeyFunc(AUX_UP, (AUXKEYPROC)YawUp);
-    auxKeyFunc(AUX_DOWN, (AUXKEYPROC)YawDown);
-    auxKeyFunc(AUX_LEFT, (AUXKEYPROC)AngleLeft);
-    auxKeyFunc(AUX_RIGHT, (AUXKEYPROC)AngleRight);
+    zbuffer_min = ZBUFFER_MIN;
+    zbuffer_max = zbuffer_min + 2.0f * radius;
+
+    camera_half_width = 4.0f;
+    camera_half_height = 4.0f;
+    camera_yaw = 0.0f;
+    camera_angle = 0.0f;
+    camera_dist = zbuffer_min + radius;
+
+    return 0;
 }
 
-static void Init(void)
-{
-    InitKeyboard();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearDepth(zbuffer_min);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-}
-
-static void CALLBACK Reshape(unsigned width,unsigned height)
+void Reshape(unsigned width, unsigned height)
 {
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     camera_half_width = (float)width / (float)height * radius * zbuffer_min / camera_dist;
     camera_half_height = radius * zbuffer_min / camera_dist;
+}
+
+static void CALLBACK CALLBACK_Draw(void)
+{
+    Draw();
+    auxSwapBuffers();
+}
+
+static void CALLBACK CALLBACK_Reshape(unsigned width, unsigned height)
+{
+    Reshape(width, height);
 }
 
 void main(int carg, char **varg)
@@ -231,16 +246,11 @@ void main(int carg, char **varg)
                         "\t\tDown arrow\t- rotate camera down.\n");
         return;
     }
-    if (!model.LoadIDP2Model(varg[1]))
+    if (Init(varg[1]) != 0)
     {
-        return;
+        fprintf(stderr, "main: failed to load model\n");
+        return 1;
     }
-        
-    num_frames = model.GetNumFrames();
-    radius = model.GetBoundRadius();
-
-    camera_dist = zbuffer_min + radius;
-    zbuffer_max = zbuffer_min + 2.0f * radius;
 
     auxInitPosition(0, 0, 800, 600);
     auxInitDisplayMode(AUX_RGB | AUX_DOUBLE);
@@ -248,7 +258,19 @@ void main(int carg, char **varg)
     {
         auxQuit();
     }
-    Init();
-    auxReshapeFunc((AUXRESHAPEPROC)Reshape);
-    auxMainLoop(Draw);
+
+    auxKeyFunc(AUX_q, (AUXKEYPROC)DistUp);
+    auxKeyFunc(AUX_a, (AUXKEYPROC)DistDown);
+    auxKeyFunc(AUX_z, (AUXKEYPROC)PrevFrame);
+    auxKeyFunc(AUX_x, (AUXKEYPROC)NextFrame);
+
+    auxKeyFunc(AUX_l, (AUXKEYPROC)SwitchLighting);
+
+    auxKeyFunc(AUX_UP, (AUXKEYPROC)YawUp);
+    auxKeyFunc(AUX_DOWN, (AUXKEYPROC)YawDown);
+    auxKeyFunc(AUX_LEFT, (AUXKEYPROC)AngleLeft);
+    auxKeyFunc(AUX_RIGHT, (AUXKEYPROC)AngleRight);
+
+    auxReshapeFunc((AUXRESHAPEPROC)CALLBACK_Reshape);
+    auxMainLoop(CALLBACK_Draw);
 }
