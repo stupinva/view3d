@@ -305,5 +305,5 @@ void Reshape(unsigned width, unsigned height)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     camera_half_width = (float)width / (float)height * length * zbuffer_min / camera_dist;
-    camera_half_height = length*zbuffer_min / camera_dist;
+    camera_half_height = length * zbuffer_min / camera_dist;
 }
